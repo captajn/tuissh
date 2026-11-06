@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import com.tuissh.app.R
+import com.tuissh.app.ui.settings.TerminalPrefs
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -58,6 +59,8 @@ fun TerminalScreen(
     palette: TerminalPalette = TerminalPalette.default(),
     onBack: () -> Unit,
     onOpenSftp: () -> Unit = {},
+    /** Appearance from Settings; the values used to be stored and never read. */
+    prefs: TerminalPrefs = TerminalPrefs(),
 ) {
     val state by session.state.collectAsState()
     val remoteTitle by session.title.collectAsState()
@@ -125,6 +128,8 @@ fun TerminalScreen(
                     .padding(horizontal = 4.dp),
                 onResize = { cols, rows -> session.resize(cols, rows) },
                 onScrollChanged = { scrolledBack = it },
+                fontSize = prefs.fontSize.sp,
+                cursorBlink = prefs.cursorBlink,
             )
 
             // While reading history the terminal must say so, otherwise new output
@@ -201,6 +206,16 @@ fun TerminalScreen(
         }
     }
 
+    // Keep the screen awake while a session is open, if the user asked for it. Done
+    // with a window flag rather than a wake lock: a wake lock needs a permission and
+    // outlives the screen if cleanup is missed, while this flag dies with the window.
+    if (prefs.keepScreenOn) {
+        val view = androidx.compose.ui.platform.LocalView.current
+        DisposableEffect(Unit) {
+            view.keepScreenOn = true
+            onDispose { view.keepScreenOn = false }
+        }
+    }
     // Bell / clipboard side channels.
     LaunchedEffect(Unit) {
         session.bell.collect {

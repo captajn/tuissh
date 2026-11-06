@@ -42,6 +42,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.tuissh.app.R
+import androidx.compose.ui.text.style.TextOverflow
+import com.tuissh.app.ui.theme.TuiPalette
 import com.tuissh.app.ui.key.KeyPickerRow
 import androidx.compose.ui.unit.dp
 import com.tuissh.app.data.model.ServerEntity
@@ -189,10 +191,13 @@ fun ServerEditScreen(
     onBack: () -> Unit,
     /** Opens the key manager when the user has no key to pick yet. */
     onManageKeys: () -> Unit = {},
+    /** Opens port forwarding for a saved server. */
+    onManageForwards: (Long) -> Unit = {},
 ) {
     val form by viewModel.form.collectAsState()
     val saved by viewModel.saved.collectAsState()
     val keys by viewModel.keys.collectAsState()
+    val servers by viewModel.servers.collectAsState()
 
     androidx.compose.runtime.LaunchedEffect(saved) {
         saved?.let(onSaved)
@@ -312,6 +317,60 @@ fun ServerEditScreen(
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 )
+            }
+            // ProxyJump. The resolver and the entity field already existed; without this
+            // picker a bastion could only be configured by editing the database, so any
+            // server behind a jump host was unreachable from the app.
+            Text(
+                text = stringResource(R.string.server_bastion),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            if (servers.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.server_bastion_none),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = TuiPalette.TextSecondary,
+                )
+            } else {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    androidx.compose.foundation.lazy.LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        item {
+                            androidx.compose.material3.FilterChip(
+                                selected = form.bastionServerId == null,
+                                onClick = {
+                                    viewModel.update { it.copy(bastionServerId = null) }
+                                },
+                                label = { Text(stringResource(R.string.server_bastion_direct)) },
+                            )
+                        }
+                        items(servers.filter { it.id != form.id }) { candidate ->
+                            androidx.compose.material3.FilterChip(
+                                selected = form.bastionServerId == candidate.id,
+                                onClick = {
+                                    viewModel.update { it.copy(bastionServerId = candidate.id) }
+                                },
+                                label = {
+                                    Text(
+                                        text = candidate.name,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (form.id > 0) {
+                androidx.compose.material3.TextButton(
+                    onClick = { onManageForwards(form.id) },
+                ) { Text(stringResource(R.string.forward_title)) }
             }
             OutlinedTextField(
                 value = form.keepaliveSeconds,

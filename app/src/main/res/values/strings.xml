@@ -220,4 +220,16 @@
     <string name="settings_security">Bảo mật</string>
     <string name="settings_keys_subtitle">Quản lý khóa dùng để đăng nhập</string>
     <string name="settings_about">Thông tin</string>
-    <string name="settings_version">Phiên bản</string></resources>
+    <string name="settings_version">Phiên bản</string>    <!-- Port forwarding -->
+    <string name="forward_title">Chuyển tiếp cổng</string>
+    <string name="forward_count">%1$d quy tắc</string>
+    <string name="forward_add">Thêm quy tắc</string>
+    <string name="forward_empty">Chưa có quy tắc chuyển tiếp nào</string>
+    <string name="forward_name">Tên (không bắt buộc)</string>
+    <string name="forward_bind_host">Địa chỉ nghe</string>
+    <string name="forward_target_host">Đích</string>
+    <string name="forward_target_port">Cổng đích</string>
+    <string name="forward_auto_start">Tự mở khi kết nối</string>
+    <string name="forward_delete_title">Xoá quy tắc này?</string>    <string name="server_bastion">Máy trung chuyển (ProxyJump)</string>
+    <string name="server_bastion_none">Chưa có máy chủ nào khác để làm trung chuyển.</string>
+    <string name="server_bastion_direct">Kết nối trực tiếp</string></resources>

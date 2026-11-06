@@ -117,6 +117,11 @@ class ServerEditViewModel(
     val keys: StateFlow<List<PrivateKeyEntity>> = repository.observeKeys()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    /** Every server, for the ProxyJump picker. */
+    val servers: StateFlow<List<com.tuissh.app.data.model.ServerEntity>> =
+        repository.observeServers()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
     private val _saved = MutableStateFlow<Long?>(null)
     val saved: StateFlow<Long?> = _saved.asStateFlow()
 

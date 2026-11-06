@@ -8,6 +8,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.tuissh.app.ui.key.KeyListViewModel
 import com.tuissh.app.ui.key.KeyListScreen
+import com.tuissh.app.ui.forward.ForwardListViewModel
+import com.tuissh.app.ui.forward.ForwardListScreen
 import com.tuissh.app.ui.settings.SettingsViewModel
 import com.tuissh.app.ui.settings.SettingsScreen
 import com.tuissh.app.ui.ai.AiProviderDialog

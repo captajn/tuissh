@@ -219,4 +219,16 @@
     <string name="settings_security">Security</string>
     <string name="settings_keys_subtitle">Manage the keys used to sign in</string>
     <string name="settings_about">About</string>
-    <string name="settings_version">Version</string></resources>
+    <string name="settings_version">Version</string>    <!-- Port forwarding -->
+    <string name="forward_title">Port forwarding</string>
+    <string name="forward_count">%1$d rules</string>
+    <string name="forward_add">Add rule</string>
+    <string name="forward_empty">No forwarding rules yet</string>
+    <string name="forward_name">Name (optional)</string>
+    <string name="forward_bind_host">Listen address</string>
+    <string name="forward_target_host">Target</string>
+    <string name="forward_target_port">Target port</string>
+    <string name="forward_auto_start">Start on connect</string>
+    <string name="forward_delete_title">Delete this rule?</string>    <string name="server_bastion">Jump host (ProxyJump)</string>
+    <string name="server_bastion_none">No other server is available as a jump host.</string>
+    <string name="server_bastion_direct">Connect directly</string></resources>

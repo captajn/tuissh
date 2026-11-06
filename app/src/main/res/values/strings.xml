@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Vietnamese is the app's primary locale. These are hand-written strings, not
+      machine translation: the original NeoServer shipped a complete 3.590-key
+      Vietnamese bundle, larger than its English one, so Vietnamese is treated as
+      first-class rather than as an afterthought.
+    -->
+    <string name="app_name">Tui SSH</string>
+
+    <string name="channel_terminal">Phiên terminal</string>
+    <string name="channel_terminal_desc">Giữ kết nối SSH sống khi NeoServer chạy nền.</string>
+    <string name="channel_alerts">Cảnh báo máy chủ</string>
+    <string name="channel_alerts_desc">Thông báo máy chủ mất kết nối và vượt ngưỡng tài nguyên.</string>
+    <string name="channel_transfers">Truyền tệp</string>
+    <string name="channel_transfers_desc">Tiến độ tải lên và tải xuống qua SFTP.</string>
+
+    <string name="terminal_service_title">Tui SSH</string>
+    <string name="terminal_service_text">%1$d phiên đang hoạt động</string>
+
+    <!-- Navigation -->
+    <string name="nav_servers">Máy chủ</string>
+    <string name="nav_terminal">Terminal</string>
+    <string name="nav_sftp">SFTP</string>
+    <string name="nav_docker">Docker</string>
+    <string name="nav_monitor">Giám sát</string>
+    <string name="nav_scripts">Lệnh</string>
+    <string name="nav_ai">Trợ lý AI</string>
+    <string name="nav_settings">Cài đặt</string>
+
+    <!-- Server list -->
+    <string name="server_list_search">Tìm máy chủ</string>
+    <string name="server_list_empty">Chưa có máy chủ nào. Nhấn + để thêm.</string>
+    <string name="server_list_title">Tui SSH</string>
+    <string name="server_action_add">Thêm máy chủ</string>
+    <string name="server_action_favorite">Yêu thích</string>
+    <string name="server_action_unfavorite">Bỏ yêu thích</string>
+    <string name="server_action_delete">Xóa</string>
+    <string name="server_action_edit">Sửa</string>
+
+    <!-- Server form -->
+    <string name="server_edit_new">Máy chủ mới</string>
+    <string name="server_edit_existing">Sửa máy chủ</string>
+    <string name="server_name">Tên</string>
+    <string name="server_host">IP hoặc tên miền</string>
+    <string name="server_port">Cổng</string>
+    <string name="server_user">Người dùng</string>
+    <string name="server_password_keep">Mật khẩu (để trống nếu giữ nguyên)</string>
+    <string name="server_keepalive">Keepalive (giây)</string>
+    <string name="server_advanced_note">Tùy chọn nâng cao (ProxyJump, Mosh, Wake-on-LAN) sẽ có khi engine tương ứng hoàn thành.</string>
+    <string name="server_save">Lưu</string>
+    <string name="server_back">Quay lại</string>
+
+    <!-- Terminal -->
+    <string name="terminal_connecting">Đang kết nối…</string>
+    <string name="terminal_closed">đã đóng · %1$dx%2$d</string>
+    <string name="terminal_failed">lỗi · %1$s</string>
+    <string name="terminal_disconnected">mất kết nối</string>
+    <string name="terminal_input_hint">Nhập lệnh…</string>
+    <string name="terminal_send">Gửi</string>
+    <string name="terminal_server_gone">Máy chủ không còn tồn tại.</string>
+
+    <!-- Errors mirroring NeoError messages -->
+    <string name="err_connection_timeout">Hết thời gian kết nối</string>
+    <string name="err_host_unreachable">Không tới được máy chủ</string>
+    <string name="err_connection_refused">Máy chủ từ chối kết nối</string>
+    <string name="err_connection_lost">Mất kết nối</string>
+    <string name="err_dns_failure">Không phân giải được tên miền</string>
+    <string name="err_auth_failed">Xác thực thất bại</string>
+    <string name="err_auth_cancelled">Đã hủy xác thực</string>
+    <string name="err_auth_timeout">Hết thời gian chờ mật khẩu</string>
+    <string name="err_host_key_changed">Khóa SSH của máy chủ không còn khớp với khóa đã tin. Có thể do cài lại máy chủ, nhưng cũng có thể là tấn công. Hãy kiểm tra trước khi tiếp tục.</string>
+    <string name="err_sftp_unavailable">Không mở được SFTP. Kiểm tra SFTP đã bật trên máy chủ.</string>
+    <string name="err_invalid_key">Khóa riêng không hợp lệ</string>
+    <string name="err_passphrase_required">Cần mật khẩu cho khóa riêng</string>
+    <string name="err_bastion_not_found">Không tìm thấy máy chủ bastion</string>
+    <string name="err_cyclic_bastion">Cấu hình bastion bị vòng lặp</string>
+    <string name="err_mosh_missing">Máy chủ chưa cài mosh-server. Cài mosh-server và mở UDP 60000-61000.</string>
+    <string name="err_docker_unavailable">Không truy cập được Docker trên máy chủ này</string>
+    <string name="err_invalid_port">Cổng không hợp lệ. Dùng giá trị từ 1 đến 65535.</string>
+
+    <!-- AI -->
+    <string name="ai_provider">Nhà cung cấp</string>
+    <string name="ai_model">Mô hình</string>
+    <string name="ai_api_key">Khóa API</string>
+    <string name="ai_new_chat">Trò chuyện mới</string>
+    <string name="ai_send">Gửi</string>
+    <string name="ai_stop">Dừng</string>
+    <string name="ai_confirm_run">Cho phép chạy lệnh này?</string>
+    <string name="ai_plan_mode">Chế độ lập kế hoạch (chỉ đọc)</string>
+
+    <!-- Common -->
+    <string name="common_ok">Đồng ý</string>
+    <string name="common_retry">Thử lại</string>
+    <string name="common_copy">Sao chép</string>
+    <string name="common_paste">Dán</string>
+    <string name="common_refresh">Làm mới</string>
+    <string name="common_loading">Đang tải…</string>
+    <string name="common_empty">Trống</string>
+    <string name="common_unknown_error">Lỗi không xác định</string>
+    <!-- Host key prompts -->
+    <string name="hostkey_unknown_title">Máy chủ lạ</string>
+    <string name="hostkey_unknown_body">Lần đầu kết nối tới %1$s. Hãy so sánh dấu vân tay với máy chủ trước khi tin.</string>
+    <string name="hostkey_changed_title">Khóa máy chủ đã thay đổi</string>
+    <string name="hostkey_previous">Trước đây:</string>
+    <string name="hostkey_current">Hiện tại:</string>
+    <string name="hostkey_trust">Tin và kết nối</string>
+    <string name="hostkey_replace">Cập nhật khóa</string>
+    <string name="hostkey_cancel">Hủy</string>    <!-- SFTP -->
+    <string name="sftp_items">mục</string>
+    <string name="sftp_empty">Thư mục trống</string>
+    <string name="sftp_upload">Tải lên</string>
+    <string name="sftp_download">Tải xuống</string>
+    <string name="sftp_delete_n">Xóa %1$d</string>
+    <string name="sftp_delete_confirm">Xóa %1$d mục?</string>
+    <string name="sftp_delete_irreversible">Không thể hoàn tác. Thư mục sẽ bị xóa cùng toàn bộ nội dung.</string>
+    <string name="sftp_new_folder">Tạo thư mục</string>
+    <string name="sftp_sort_name">Sắp xếp theo tên</string>
+    <string name="sftp_sort_size">Sắp xếp theo kích thước</string>
+    <string name="sftp_sort_date">Sắp xếp theo ngày</string>
+    <string name="sftp_toggle_hidden">Hiện/ẩn tệp ẩn</string>
+    <string name="sftp_size">Kích thước</string>
+    <string name="sftp_permissions">Quyền</string>
+    <string name="sftp_path_and_permissions">Đường dẫn và quyền</string>
+    <string name="sftp_open_file">Mở</string>    <string name="sftp_transferring">Đang truyền %1$s…</string>
+    <string name="sftp_uploading">Đang tải lên %1$s…</string>
+    <string name="sftp_upload_done">Đã tải lên %1$s (%2$s)</string>
+    <string name="sftp_download_done">Đã tải xuống %1$s (%2$s)</string>    <!-- Secret prompts -->
+    <string name="secret_show">Hiện</string>
+    <string name="secret_hide">Ẩn</string>
+    <string name="secret_connect">Kết nối</string>
+    <string name="secret_title">Xác thực</string>
+    <string name="secret_password_title">Nhập mật khẩu</string>
+    <string name="secret_password_body">Mật khẩu cho %1$s</string>
+    <string name="secret_passphrase_title">Cụm mật khẩu của khóa</string>
+    <string name="secret_passphrase_body">Khóa %1$s được bảo vệ bằng cụm mật khẩu.</string>    <string name="terminal_cancelled">Đã hủy kết nối.</string>
+    <!-- Container engine -->
+    <string name="err_engine_unavailable">%1$s chưa được cài trên máy chủ.</string>
+    <string name="err_engine_permission">Không có quyền với container engine. Thêm người dùng vào nhóm docker.</string>
+    <string name="err_engine_daemon_down">Container engine đã cài nhưng chưa chạy.</string>    <!-- Docker UI -->
+    <string name="docker_title">Container</string>
+    <string name="docker_detecting">Đang dò engine…</string>
+    <string name="docker_tab_containers">Container (%1$d)</string>
+    <string name="docker_tab_images">Image (%1$d)</string>
+    <string name="docker_tab_volumes">Volume (%1$d)</string>
+    <string name="docker_tab_networks">Network (%1$d)</string>
+    <string name="docker_no_containers">Không có container nào.</string>
+    <string name="docker_no_images">Không có image nào.</string>
+    <string name="docker_no_volumes">Không có volume nào.</string>
+    <string name="docker_no_networks">Không có network nào.</string>
+    <string name="docker_start">Chạy</string>
+    <string name="docker_stop">Dừng</string>
+    <string name="docker_restart">Khởi động lại</string>
+    <string name="docker_logs">Log</string>
+    <string name="docker_logs_title">Log · %1$s</string>
+    <string name="docker_logs_loading">Đang tải log…</string>
+    <string name="docker_logs_empty">Không có log.</string>    <!-- Shell navigation -->
+    <string name="nav_metrics">Chỉ số</string>
+    <string name="nav_containers">Container</string>
+    <string name="nav_more">Thêm</string>
+    <string name="tab_metrics_pending">Chỉ số</string>
+    <string name="tab_metrics_body">Cần parser monitor: CPU, RAM, đĩa, tiến trình.</string>
+    <string name="tab_files_pending">Chọn máy chủ</string>
+    <string name="tab_files_body">Mở một máy chủ trong tab Terminal để dùng SFTP.</string>
+    <string name="tab_containers_pending">Container</string>
+    <string name="tab_containers_body">Cần kết nối tới máy chủ có Docker hoặc Podman.</string>
+    <string name="tab_more_body">Cài đặt, khóa SSH, giao diện, ngôn ngữ.</string>    <!-- Monitor -->
+    <string name="monitor_reading">Đang đọc số liệu…</string>
+    <string name="monitor_cpu">CPU</string>
+    <string name="monitor_measuring">đo…</string>
+    <string name="monitor_load">Tải</string>
+    <string name="monitor_iowait">Chờ I/O</string>
+    <string name="monitor_memory">Bộ nhớ</string>
+    <string name="monitor_used">Đã dùng</string>
+    <string name="monitor_total">Tổng</string>
+    <string name="monitor_swap">Swap</string>
+    <string name="monitor_disks">Ổ đĩa</string>
+    <string name="monitor_processes">Tiến trình</string>
+    <string name="monitor_kill">Dừng</string>
+    <string name="monitor_empty">Máy chủ không trả về số liệu nào.</string>    <!-- AI chat -->
+    <string name="ai_empty">Hỏi trợ lý về máy chủ này. Nó đọc được tệp, số liệu, container và chạy lệnh khi bạn duyệt.</string>
+    <string name="ai_hint">Nhập câu hỏi…</string>
+    <string name="ai_tool_running">đang chạy…</string>
+    <string name="ai_approve_title">Chạy lệnh này?</string>
+    <string name="ai_approve_body">Lệnh sẽ chạy trên máy chủ với quyền của bạn. Chỉ đồng ý nếu bạn hiểu nó làm gì.</string>
+    <string name="ai_approve_run">Chạy</string>    <string name="ai_halt">Dừng trả lời</string>
+    <string name="ai_setup_title">Cấu hình trợ lý</string>
+    <string name="ai_setup_base_url">Địa chỉ API</string>
+    <string name="ai_setup_model">Tên model</string>
+    <string name="ai_setup_key">API key</string>
+    <string name="ai_setup_note">Key được mã hoá bằng Android Keystore và không bao giờ rời khỏi thiết bị.</string>
+    <string name="ai_setup_needed">Chưa cấu hình trợ lý AI</string>
+    <string name="ai_setup_hint">Nhập địa chỉ API, tên model và key để bắt đầu.</string>    <string name="terminal_scrolled_back">Đang xem lịch sử · %1$d dòng</string>
+</resources>

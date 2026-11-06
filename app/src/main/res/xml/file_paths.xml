@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- AI chat downloads, mirroring the app's AIChat/Downloads directory -->
+    <files-path name="ai_downloads" path="AIChat/Downloads/" />
+    <!-- Terminal uploads staging -->
+    <files-path name="terminal_uploads" path="uploads/" />
+    <!-- ZMODEM received files -->
+    <files-path name="zmodem" path="ZMODEM/" />
+    <cache-path name="cache" path="." />
+    <external-files-path name="external" path="." />
+</paths>

@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      English fallback. The base `values/` folder ships Vietnamese, so English
+      devices read this file instead. Keep the two in sync: every key here must
+      exist in `values/strings.xml`.
+    -->
+    <string name="app_name">Tui SSH</string>
+
+    <string name="channel_terminal">Terminal sessions</string>
+    <string name="channel_terminal_desc">Keeps SSH connections alive while Tui SSH is in the background.</string>
+    <string name="channel_alerts">Server alerts</string>
+    <string name="channel_alerts_desc">Server reachability and resource threshold warnings.</string>
+    <string name="channel_transfers">File transfers</string>
+    <string name="channel_transfers_desc">Progress for SFTP uploads and downloads.</string>
+
+    <string name="terminal_service_title">Tui SSH</string>
+    <string name="terminal_service_text">%1$d active session(s)</string>
+
+    <!-- Navigation -->
+    <string name="nav_servers">Servers</string>
+    <string name="nav_terminal">Terminal</string>
+    <string name="nav_sftp">SFTP</string>
+    <string name="nav_docker">Docker</string>
+    <string name="nav_monitor">Monitor</string>
+    <string name="nav_scripts">Scripts</string>
+    <string name="nav_ai">AI assistant</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Server list -->
+    <string name="server_list_search">Search servers</string>
+    <string name="server_list_empty">No servers yet. Tap + to add one.</string>
+    <string name="server_list_title">Tui SSH</string>
+    <string name="server_action_add">Add server</string>
+    <string name="server_action_favorite">Favorite</string>
+    <string name="server_action_unfavorite">Unfavorite</string>
+    <string name="server_action_delete">Delete</string>
+    <string name="server_action_edit">Edit</string>
+
+    <!-- Server form -->
+    <string name="server_edit_new">New server</string>
+    <string name="server_edit_existing">Edit server</string>
+    <string name="server_name">Name</string>
+    <string name="server_host">IP or hostname</string>
+    <string name="server_port">Port</string>
+    <string name="server_user">User</string>
+    <string name="server_password_keep">Password (leave blank to keep)</string>
+    <string name="server_keepalive">Keepalive (seconds)</string>
+    <string name="server_advanced_note">Advanced options (ProxyJump, Mosh, Wake-on-LAN) land with the corresponding engines.</string>
+    <string name="server_save">Save</string>
+    <string name="server_back">Back</string>
+
+    <!-- Terminal -->
+    <string name="terminal_connecting">Connecting…</string>
+    <string name="terminal_closed">closed · %1$dx%2$d</string>
+    <string name="terminal_failed">failed · %1$s</string>
+    <string name="terminal_disconnected">disconnected</string>
+    <string name="terminal_input_hint">Type a command…</string>
+    <string name="terminal_send">Send</string>
+    <string name="terminal_server_gone">Server no longer exists.</string>
+
+    <!-- Errors -->
+    <string name="err_connection_timeout">Connection timeout</string>
+    <string name="err_host_unreachable">Host unreachable</string>
+    <string name="err_connection_refused">Connection refused</string>
+    <string name="err_connection_lost">Connection lost</string>
+    <string name="err_dns_failure">Failed to resolve hostname</string>
+    <string name="err_auth_failed">Authentication failed</string>
+    <string name="err_auth_cancelled">Authentication cancelled</string>
+    <string name="err_auth_timeout">Authentication timed out waiting for the password</string>
+    <string name="err_host_key_changed">The SSH host key no longer matches the trusted key. This can happen after reinstalling the server, but it may also indicate an attack. Check before continuing.</string>
+    <string name="err_sftp_unavailable">Could not open SFTP. Check that SFTP is enabled on the server.</string>
+    <string name="err_invalid_key">Invalid private key</string>
+    <string name="err_passphrase_required">Private key passphrase required</string>
+    <string name="err_bastion_not_found">Bastion server not found</string>
+    <string name="err_cyclic_bastion">Cyclic bastion configuration</string>
+    <string name="err_mosh_missing">mosh-server is not installed on the remote server. Install mosh-server and allow UDP 60000-61000.</string>
+    <string name="err_docker_unavailable">Docker is not reachable on this server</string>
+    <string name="err_invalid_port">Invalid port. Use a value between 1 and 65535.</string>
+
+    <!-- AI -->
+    <string name="ai_provider">Provider</string>
+    <string name="ai_model">Model</string>
+    <string name="ai_api_key">API key</string>
+    <string name="ai_new_chat">New chat</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_stop">Stop</string>
+    <string name="ai_confirm_run">Run this command?</string>
+    <string name="ai_plan_mode">Plan mode (read only)</string>
+
+    <!-- Common -->
+    <string name="common_ok">OK</string>
+    <string name="common_retry">Retry</string>
+    <string name="common_copy">Copy</string>
+    <string name="common_paste">Paste</string>
+    <string name="common_refresh">Refresh</string>
+    <string name="common_loading">Loading…</string>
+    <string name="common_empty">Empty</string>
+    <string name="common_unknown_error">Unknown error</string>
+    <!-- Host key prompts -->
+    <string name="hostkey_unknown_title">Unknown host</string>
+    <string name="hostkey_unknown_body">First connection to %1$s. Compare the fingerprint with the server before trusting it.</string>
+    <string name="hostkey_changed_title">Host key has changed</string>
+    <string name="hostkey_previous">Previously:</string>
+    <string name="hostkey_current">Now:</string>
+    <string name="hostkey_trust">Trust and connect</string>
+    <string name="hostkey_replace">Update key</string>
+    <string name="hostkey_cancel">Cancel</string>    <!-- SFTP -->
+    <string name="sftp_items">items</string>
+    <string name="sftp_empty">Folder is empty</string>
+    <string name="sftp_upload">Upload</string>
+    <string name="sftp_download">Download</string>
+    <string name="sftp_delete_n">Delete %1$d</string>
+    <string name="sftp_delete_confirm">Delete %1$d item(s)?</string>
+    <string name="sftp_delete_irreversible">This cannot be undone. Folders are removed with all their contents.</string>
+    <string name="sftp_new_folder">New folder</string>
+    <string name="sftp_sort_name">Sort by name</string>
+    <string name="sftp_sort_size">Sort by size</string>
+    <string name="sftp_sort_date">Sort by date</string>
+    <string name="sftp_toggle_hidden">Show/hide hidden files</string>
+    <string name="sftp_size">Size</string>
+    <string name="sftp_permissions">Permissions</string>
+    <string name="sftp_path_and_permissions">Path and permissions</string>
+    <string name="sftp_open_file">Open</string>    <string name="sftp_transferring">Transferring %1$s…</string>
+    <string name="sftp_uploading">Uploading %1$s…</string>
+    <string name="sftp_upload_done">Uploaded %1$s (%2$s)</string>
+    <string name="sftp_download_done">Downloaded %1$s (%2$s)</string>    <!-- Secret prompts -->
+    <string name="secret_show">Show</string>
+    <string name="secret_hide">Hide</string>
+    <string name="secret_connect">Connect</string>
+    <string name="secret_title">Authenticate</string>
+    <string name="secret_password_title">Enter password</string>
+    <string name="secret_password_body">Password for %1$s</string>
+    <string name="secret_passphrase_title">Key passphrase</string>
+    <string name="secret_passphrase_body">The key %1$s is protected by a passphrase.</string>    <string name="terminal_cancelled">Connection cancelled.</string>
+    <!-- Container engine -->
+    <string name="err_engine_unavailable">%1$s is not installed on the server.</string>
+    <string name="err_engine_permission">Permission denied talking to the container engine. Add the user to the docker group.</string>
+    <string name="err_engine_daemon_down">The container engine is installed but not running.</string>    <!-- Docker UI -->
+    <string name="docker_title">Containers</string>
+    <string name="docker_detecting">Detecting engine…</string>
+    <string name="docker_tab_containers">Containers (%1$d)</string>
+    <string name="docker_tab_images">Images (%1$d)</string>
+    <string name="docker_tab_volumes">Volumes (%1$d)</string>
+    <string name="docker_tab_networks">Networks (%1$d)</string>
+    <string name="docker_no_containers">No containers.</string>
+    <string name="docker_no_images">No images.</string>
+    <string name="docker_no_volumes">No volumes.</string>
+    <string name="docker_no_networks">No networks.</string>
+    <string name="docker_start">Start</string>
+    <string name="docker_stop">Stop</string>
+    <string name="docker_restart">Restart</string>
+    <string name="docker_logs">Logs</string>
+    <string name="docker_logs_title">Logs · %1$s</string>
+    <string name="docker_logs_loading">Loading logs…</string>
+    <string name="docker_logs_empty">No log output.</string>    <!-- Shell navigation -->
+    <string name="nav_metrics">Metrics</string>
+    <string name="nav_containers">Containers</string>
+    <string name="nav_more">More</string>
+    <string name="tab_metrics_pending">Metrics</string>
+    <string name="tab_metrics_body">Needs the monitor parser: CPU, RAM, disk, processes.</string>
+    <string name="tab_files_pending">Pick a server</string>
+    <string name="tab_files_body">Open a server in the Terminal tab to use SFTP.</string>
+    <string name="tab_containers_pending">Containers</string>
+    <string name="tab_containers_body">Needs a connection to a host running Docker or Podman.</string>
+    <string name="tab_more_body">Settings, SSH keys, appearance, language.</string>    <!-- Monitor -->
+    <string name="monitor_reading">Reading metrics…</string>
+    <string name="monitor_cpu">CPU</string>
+    <string name="monitor_measuring">measuring…</string>
+    <string name="monitor_load">Load</string>
+    <string name="monitor_iowait">IO wait</string>
+    <string name="monitor_memory">Memory</string>
+    <string name="monitor_used">Used</string>
+    <string name="monitor_total">Total</string>
+    <string name="monitor_swap">Swap</string>
+    <string name="monitor_disks">Disks</string>
+    <string name="monitor_processes">Processes</string>
+    <string name="monitor_kill">Kill</string>
+    <string name="monitor_empty">The host returned no metrics.</string>    <!-- AI chat -->
+    <string name="ai_empty">Ask the assistant about this server. It can read files, metrics and containers, and run commands with your approval.</string>
+    <string name="ai_hint">Ask something…</string>
+    <string name="ai_tool_running">running…</string>
+    <string name="ai_approve_title">Run this command?</string>
+    <string name="ai_approve_body">The command runs on the server with your permissions. Approve only if you understand it.</string>
+    <string name="ai_approve_run">Run</string>    <string name="ai_halt">Stop replying</string>
+    <string name="ai_setup_title">Assistant setup</string>
+    <string name="ai_setup_base_url">API base URL</string>
+    <string name="ai_setup_model">Model name</string>
+    <string name="ai_setup_key">API key</string>
+    <string name="ai_setup_note">The key is encrypted with the Android Keystore and never leaves the device.</string>
+    <string name="ai_setup_needed">The assistant is not configured</string>
+    <string name="ai_setup_hint">Enter the API base URL, model name and key to start.</string>    <string name="terminal_scrolled_back">Viewing history · %1$d lines</string>
+</resources>

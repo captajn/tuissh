@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Credentials and known hosts must never leave the device through backup. -->
+    <exclude domain="database" path="neoserver.db" />
+    <exclude domain="sharedpref" path="." />
+</full-backup-content>

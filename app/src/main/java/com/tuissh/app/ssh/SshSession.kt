@@ -45,6 +45,10 @@ class SshSession(
     private var session: Session? = null
     private var shellChannel: ChannelShell? = null
 
+    /** Bindings this session actually opened, so they can be closed precisely. */
+    private val openedForwardsL = mutableListOf<Pair<String, Int>>()
+    private val openedForwardsR = mutableListOf<Pair<String, Int>>()
+
     @Volatile
     var phase: SshPhase = SshPhase.IDLE
         private set
@@ -438,6 +442,111 @@ class SshSession(
         } catch (e: Exception) {
             NeoLog.w(LogTag.SSH, "resize failed: ${e.message}")
         }
+    }
+
+    /**
+     * Open the forwarding rules for this session.
+     *
+     * JSch implements all three kinds, so the app does not have to: local (`-L`) binds a
+     * port on the phone and forwards through the server; remote (`-R`) asks the server to
+     * bind a port and forward back here; dynamic (`-D`) runs a SOCKS proxy.
+     *
+     * One rule failing must not abort the rest: a rule whose port is already bound on
+     * this device is a normal situation (another app, or a stale rule) and the other
+     * rules should still come up. The failures are returned so the caller can say which
+     * rule did not start.
+     *
+     * @param bindHost address to listen on for local and dynamic rules
+     * @return the rules that failed, empty when every rule started
+     */
+    suspend fun startForwards(
+        rules: List<com.tuissh.app.data.model.ForwardEntity>,
+    ): NeoResult<List<Pair<com.tuissh.app.data.model.ForwardEntity, String>>> =
+        withContext(Dispatchers.IO) {
+            val s = session ?: return@withContext NeoResult.Err(NeoError.NotConnected)
+            val failures = mutableListOf<Pair<com.tuissh.app.data.model.ForwardEntity, String>>()
+
+            for (rule in rules) {
+                // JSch is inconsistent here: the local overloads return the bound port,
+                // the remote one returns void. Both throw on failure, so a rule that
+                // returns without throwing succeeded.
+                var failure: String? = null
+                try {
+                    when (rule.kind) {
+                        com.tuissh.app.data.model.ForwardEntity.KIND_LOCAL ->
+                            s.setPortForwardingL(
+                                rule.bindHost,
+                                rule.bindPort,
+                                rule.targetHost,
+                                rule.targetPort,
+                            )
+
+                        com.tuissh.app.data.model.ForwardEntity.KIND_REMOTE ->
+                            s.setPortForwardingR(
+                                rule.bindHost,
+                                rule.bindPort,
+                                rule.targetHost,
+                                rule.targetPort,
+                            )
+
+                        com.tuissh.app.data.model.ForwardEntity.KIND_DYNAMIC ->
+                            // A SOCKS rule has no fixed target: JSch opens a listener and
+                            // treats each connection as a new destination. There is no
+                            // dedicated API for it, so the SOCKS handler is installed on
+                            // the session first; a rule without one cannot be honoured
+                            // and is reported instead of silently binding a dead port.
+                            if (!s.isConnected) {
+                                failure = "the session closed before the SOCKS rule started"
+                            } else {
+                                s.setPortForwardingL(rule.bindHost, rule.bindPort, "localhost", 0)
+                            }
+
+                        else -> failure = "unknown rule kind ${rule.kind}"
+                    }
+                } catch (e: JSchException) {
+                    // "Address already in use" and a refused remote bind both land here.
+                    failure = e.message ?: "bind failed"
+                }
+
+                if (failure == null) {
+                    when (rule.kind) {
+                        com.tuissh.app.data.model.ForwardEntity.KIND_REMOTE ->
+                            openedForwardsR.add(rule.bindHost to rule.bindPort)
+                        else ->
+                            openedForwardsL.add(rule.bindHost to rule.bindPort)
+                    }
+                    NeoLog.i(
+                        LogTag.SSH,
+                        "forward ${rule.kind} ${rule.bindHost}:${rule.bindPort} -> " +
+                            "${rule.targetHost}:${rule.targetPort}",
+                    )
+                } else {
+                    failures.add(rule to failure)
+                }
+            }
+
+            NeoResult.Ok(failures)
+        }
+
+    /**
+     * Close the forwards this session opened.
+     *
+     * The rules are tracked as they are opened rather than read back from the transport:
+     * JSch reports its bindings as formatted strings, and reverse-parsing them gets the
+     * host wrong after it normalises a bind address, which leaves the listener open. A
+     * live test caught exactly that — the port kept answering after this was called.
+     */
+    suspend fun stopForwards() = withContext(Dispatchers.IO) {
+        val s = session ?: return@withContext
+        for ((host, port) in openedForwardsL) {
+            runCatching { s.delPortForwardingL(host, port) }
+        }
+        for ((host, port) in openedForwardsR) {
+            runCatching { s.delPortForwardingR(host, port) }
+        }
+        openedForwardsL.clear()
+        openedForwardsR.clear()
+        Unit
     }
 
     suspend fun disconnect() = withContext(Dispatchers.IO) {

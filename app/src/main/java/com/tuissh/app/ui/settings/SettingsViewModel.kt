@@ -6,6 +6,8 @@ import com.tuissh.app.data.dao.KvDao
 import com.tuissh.app.ui.NeoActivity
 import com.tuissh.app.i18n.LocaleEngine
 import com.tuissh.app.i18n.NeoLocale
+import com.tuissh.app.ui.theme.AppThemeMode
+import com.tuissh.app.ui.theme.ThemeState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +32,7 @@ class SettingsViewModel(
     data class UiState(
         /** BCP-47 tag, or [FOLLOW_SYSTEM]. */
         val language: String = LocaleEngine.DEFAULT_LANGUAGE,
+        val appThemeMode: AppThemeMode = AppThemeMode.DARK,
         val fontSize: Int = DEFAULT_FONT_SIZE,
         val cursorBlink: Boolean = true,
         val keepScreenOn: Boolean = false,
@@ -60,11 +63,14 @@ class SettingsViewModel(
         viewModelScope.launch {
             val language = kv.get(KEY_LANGUAGE)?.takeIf { it.isNotBlank() }
                 ?: LocaleEngine.DEFAULT_LANGUAGE
+            val themeMode = AppThemeMode.from(kv.get(KEY_APP_THEME))
+            ThemeState.mode.value = themeMode
             val font = kv.get(KEY_FONT_SIZE)?.toIntOrNull()
                 ?.coerceIn(UiState.MIN_FONT_SIZE, UiState.MAX_FONT_SIZE)
                 ?: UiState.DEFAULT_FONT_SIZE
             _state.value = UiState(
                 language = language,
+                appThemeMode = themeMode,
                 fontSize = font,
                 cursorBlink = kv.get(KEY_CURSOR_BLINK) != "false",
                 keepScreenOn = kv.get(KEY_KEEP_AWAKE) == "true",
@@ -73,6 +79,27 @@ class SettingsViewModel(
                 loaded = true,
             )
         }
+    }
+
+    /**
+     * Change macOS 27 app theme mode immediately.
+     */
+    fun setAppTheme(mode: AppThemeMode) {
+        _state.value = _state.value.copy(appThemeMode = mode)
+        ThemeState.mode.value = mode
+        viewModelScope.launch {
+            kv.put(KEY_APP_THEME, mode.storageKey)
+            mirrorTheme(mode)
+        }
+    }
+
+    /** Write the app theme to shared preferences for early launch reads. */
+    fun mirrorTheme(mode: AppThemeMode) {
+        appContext
+            ?.getSharedPreferences(THEME_PREFS, android.content.Context.MODE_PRIVATE)
+            ?.edit()
+            ?.putString(THEME_KEY, mode.storageKey)
+            ?.apply()
     }
 
     /**
@@ -152,6 +179,10 @@ class SettingsViewModel(
         /** Stored value meaning "whatever the device is set to". */
         const val FOLLOW_SYSTEM = "system"
 
+        const val THEME_PREFS = "app_theme"
+        const val THEME_KEY = "mode"
+        const val KEY_APP_THEME = "settings.app.theme"
+
         const val KEY_LANGUAGE = "settings.language"
         const val KEY_FONT_SIZE = "settings.terminal.fontSize"
         const val KEY_CURSOR_BLINK = "settings.terminal.cursorBlink"
@@ -166,5 +197,9 @@ class SettingsViewModel(
          */
         suspend fun readLanguage(kv: KvDao): String =
             kv.get(KEY_LANGUAGE)?.takeIf { it.isNotBlank() } ?: LocaleEngine.DEFAULT_LANGUAGE
+
+        /** Read the saved app theme. */
+        suspend fun readTheme(kv: KvDao): AppThemeMode =
+            AppThemeMode.from(kv.get(KEY_APP_THEME))
     }
 }

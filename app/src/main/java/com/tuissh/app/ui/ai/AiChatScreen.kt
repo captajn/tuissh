@@ -36,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,7 +58,9 @@ import androidx.compose.ui.unit.sp
 import com.tuissh.app.R
 import com.tuissh.app.ai.formatToolDuration
 import com.tuissh.app.ui.localized
+import com.tuissh.app.ui.theme.LocalMacOsColors
 import com.tuissh.app.ui.theme.TuiPalette
+import com.tuissh.app.ui.theme.liquidGlassCard
 
 /**
  * Assistant chat.
@@ -75,6 +78,7 @@ fun AiChatScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
+    val tokens = LocalMacOsColors.current
 
     // Follow the stream. Keyed on the row count and the last row's text length so a
     // delta scrolls but a tool card expanding does not jump the view.
@@ -86,8 +90,15 @@ fun AiChatScreen(
     }
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                    actionIconContentColor = tokens.primaryAccent,
+                ),
                 title = {
                     Column {
                         Text(
@@ -124,6 +135,7 @@ fun AiChatScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .background(tokens.windowBackground)
                 .imePadding(),
         ) {
             if (state.rows.isEmpty()) {
@@ -190,6 +202,7 @@ fun AiChatScreen(
 
 @Composable
 private fun UserBubble(text: String) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.End,
@@ -200,24 +213,24 @@ private fun UserBubble(text: String) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
                 .widthIn(max = 320.dp)
-                .clip(RoundedCornerShape(14.dp, 14.dp, 4.dp, 14.dp))
-                .background(TuiPalette.Violet)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .clip(RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp))
+                .background(tokens.primaryAccent)
+                .padding(horizontal = 14.dp, vertical = 10.dp),
         )
     }
 }
 
 @Composable
 private fun AssistantBubble(text: String, streaming: Boolean) {
+    val tokens = LocalMacOsColors.current
     Text(
         text = if (streaming) "$text▍" else text,
         style = MaterialTheme.typography.bodyMedium,
-        color = TuiPalette.TextPrimary,
+        color = tokens.textPrimary,
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp, 14.dp, 14.dp, 4.dp))
-            .background(TuiPalette.InkRaised)
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .liquidGlassCard(RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 10.dp),
     )
 }
 
@@ -229,19 +242,19 @@ private fun AssistantBubble(text: String, streaming: Boolean) {
  */
 @Composable
 private fun ToolCard(row: AiChatViewModel.Row.Tool, onToggle: () -> Unit) {
+    val tokens = LocalMacOsColors.current
     val statusColor = when (row.state) {
-        AiChatViewModel.ToolState.RUNNING -> TuiPalette.Amber
-        AiChatViewModel.ToolState.OK -> TuiPalette.Success
-        AiChatViewModel.ToolState.FAILED -> TuiPalette.Danger
+        AiChatViewModel.ToolState.RUNNING -> tokens.statusOrange
+        AiChatViewModel.ToolState.OK -> tokens.statusGreen
+        AiChatViewModel.ToolState.FAILED -> tokens.statusRed
     }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(TuiPalette.InkCard)
+            .liquidGlassCard(RoundedCornerShape(12.dp))
             .clickable(onClick = onToggle)
-            .padding(10.dp),
+            .padding(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (row.state == AiChatViewModel.ToolState.RUNNING) {
@@ -263,7 +276,7 @@ private fun ToolCard(row: AiChatViewModel.Row.Tool, onToggle: () -> Unit) {
                 text = row.name,
                 style = MaterialTheme.typography.labelLarge,
                 fontFamily = FontFamily.Monospace,
-                color = TuiPalette.TextPrimary,
+                color = tokens.textPrimary,
                 modifier = Modifier.weight(1f),
             )
             Text(
@@ -278,7 +291,7 @@ private fun ToolCard(row: AiChatViewModel.Row.Tool, onToggle: () -> Unit) {
             Icon(
                 imageVector = if (row.expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
                 contentDescription = null,
-                tint = TuiPalette.TextSecondary,
+                tint = tokens.textSecondary,
                 modifier = Modifier.size(18.dp),
             )
         }
@@ -287,7 +300,7 @@ private fun ToolCard(row: AiChatViewModel.Row.Tool, onToggle: () -> Unit) {
             Text(
                 text = row.display,
                 style = MaterialTheme.typography.labelSmall,
-                color = TuiPalette.TextSecondary,
+                color = tokens.textSecondary,
                 maxLines = if (row.expanded) 20 else 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -298,7 +311,7 @@ private fun ToolCard(row: AiChatViewModel.Row.Tool, onToggle: () -> Unit) {
                 text = row.argumentsJson,
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
-                color = TuiPalette.TextSecondary,
+                color = tokens.textSecondary,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 6.dp)
@@ -316,11 +329,12 @@ private fun Composer(
     onValueChange: (String) -> Unit,
     onSend: () -> Unit,
 ) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(TuiPalette.InkRaised)
-            .padding(8.dp),
+            .background(tokens.chromeGlassBar)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -328,14 +342,14 @@ private fun Composer(
             modifier = Modifier
                 .weight(1f)
                 .clip(RoundedCornerShape(20.dp))
-                .background(TuiPalette.Ink)
+                .background(tokens.surfaceElevated)
                 .padding(horizontal = 14.dp, vertical = 10.dp),
         ) {
             if (value.isEmpty()) {
                 Text(
                     text = stringResource(R.string.ai_hint),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = TuiPalette.TextDisabled,
+                    color = tokens.textTertiary,
                 )
             }
             BasicTextField(
@@ -343,7 +357,7 @@ private fun Composer(
                 onValueChange = onValueChange,
                 enabled = enabled,
                 textStyle = TextStyle(
-                    color = TuiPalette.TextPrimary,
+                    color = tokens.textPrimary,
                     fontSize = 15.sp,
                 ),
                 keyboardOptions = KeyboardOptions(
@@ -360,14 +374,14 @@ private fun Composer(
             modifier = Modifier
                 .size(40.dp)
                 .clip(CircleShape)
-                .background(if (canSend) TuiPalette.Amber else TuiPalette.InkCard)
+                .background(if (canSend) tokens.primaryAccent else tokens.surfaceElevated)
                 .clickable(enabled = canSend, onClick = onSend),
             contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowUpward,
                 contentDescription = stringResource(R.string.terminal_send),
-                tint = if (canSend) TuiPalette.Ink else TuiPalette.TextDisabled,
+                tint = if (canSend) Color.White else tokens.textTertiary,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -385,6 +399,7 @@ private fun ApprovalDialog(
     request: AiChatViewModel.ApprovalRequest,
     onAnswer: (Boolean) -> Unit,
 ) {
+    val tokens = LocalMacOsColors.current
     AlertDialog(
         onDismissRequest = { onAnswer(false) },
         title = { Text(stringResource(R.string.ai_approve_title)) },
@@ -397,23 +412,23 @@ private fun ApprovalDialog(
                     text = request.command,
                     fontFamily = FontFamily.Monospace,
                     style = MaterialTheme.typography.bodySmall,
-                    color = TuiPalette.Amber,
+                    color = tokens.primaryAccent,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(TuiPalette.Ink)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(tokens.terminalBg)
                         .padding(10.dp),
                 )
                 Text(
                     text = stringResource(R.string.ai_approve_body),
                     style = MaterialTheme.typography.labelSmall,
-                    color = TuiPalette.TextSecondary,
+                    color = tokens.textSecondary,
                 )
             }
         },
         confirmButton = {
             TextButton(onClick = { onAnswer(true) }) {
-                Text(stringResource(R.string.ai_approve_run), color = TuiPalette.Danger)
+                Text(stringResource(R.string.ai_approve_run), color = tokens.statusRed)
             }
         },
         dismissButton = {

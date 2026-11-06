@@ -64,17 +64,31 @@ data class TerminalPalette(
         }
 
         /** Fallback palette when no theme row is available yet. */
-        fun default(dark: Boolean = true): TerminalPalette = TerminalPalette(
-            foreground = Color(0xFFE5E5E5),
-            background = Color(0xFF000000),
-            cursor = Color(0xFFFFFFFF),
-            selection = Color(0xFF4D4D4D),
-            ansi = IntArray(256) { i ->
-                if (i < 16) com.tuissh.app.terminal.ansi.Cell.XTERM_16[i]
-                else com.tuissh.app.terminal.ansi.Cell.paletteToRgb(i)
-            },
-            isDark = dark,
-        )
+        fun default(dark: Boolean = true): TerminalPalette = if (dark) {
+            TerminalPalette(
+                foreground = Color(0xFFF5F5F7),
+                background = Color(0xFF0D0E12),
+                cursor = Color(0xFF0A84FF),
+                selection = Color(0x660A84FF),
+                ansi = IntArray(256) { i ->
+                    if (i < 16) com.tuissh.app.terminal.ansi.Cell.XTERM_16[i]
+                    else com.tuissh.app.terminal.ansi.Cell.paletteToRgb(i)
+                },
+                isDark = true,
+            )
+        } else {
+            TerminalPalette(
+                foreground = Color(0xFF1D1D1F),
+                background = Color(0xFFFAFAFC),
+                cursor = Color(0xFF007AFF),
+                selection = Color(0x40007AFF),
+                ansi = IntArray(256) { i ->
+                    if (i < 16) com.tuissh.app.terminal.ansi.Cell.XTERM_16[i]
+                    else com.tuissh.app.terminal.ansi.Cell.paletteToRgb(i)
+                },
+                isDark = false,
+            )
+        }
 
         /** `ansiColors` is `rrggbb` hex joined with commas. */
         fun parseAnsi(text: String): List<Int> =

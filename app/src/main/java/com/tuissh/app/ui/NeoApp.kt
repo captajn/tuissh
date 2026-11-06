@@ -123,6 +123,7 @@ fun NeoApp() {
                     },
                     onAddServer = { nav.navigate("edit/0") },
                     onEditServer = { server -> nav.navigate("edit/${server.id}") },
+                    onOpenSettings = { nav.navigate("settings") },
                 )
             }
 
@@ -214,6 +215,30 @@ fun NeoApp() {
                 val id = entry.arguments?.getLong("id") ?: 0L
                 SftpDestination(serverId = id, onBack = { nav.popBackStack() })
             }
+
+            composable("settings") {
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val vm: SettingsViewModel = viewModel(
+                    factory = viewModelFactory {
+                        SettingsViewModel(services.database.kvDao(), context.applicationContext)
+                    },
+                )
+                SettingsScreen(
+                    viewModel = vm,
+                    onBack = { nav.popBackStack() },
+                    onManageKeys = { nav.navigate("keys") },
+                )
+            }
+
+            composable("keys") {
+                val vm: KeyListViewModel = viewModel(
+                    factory = viewModelFactory { KeyListViewModel(services.repository) },
+                )
+                KeyListScreen(
+                    viewModel = vm,
+                    onBack = { nav.popBackStack() },
+                )
+            }
         }
     }
 }
@@ -268,6 +293,13 @@ private fun TerminalDestination(
     var server by remember { mutableStateOf<ServerEntity?>(null) }
     var session by remember { mutableStateOf<TerminalSession?>(null) }
     var problem by remember { mutableStateOf<String?>(null) }
+    // Set when an auto-start forwarding rule could not bind.
+    var forwardProblem by remember { mutableStateOf<String?>(null) }
+    // Read once when the screen appears; settings are not live-updated mid-session.
+    var prefs by remember { mutableStateOf(com.tuissh.app.ui.settings.TerminalPrefs()) }
+    LaunchedEffect(Unit) {
+        prefs = com.tuissh.app.ui.settings.TerminalPrefs.load(services.database.kvDao())
+    }
 
     LaunchedEffect(serverId) {
         val row = services.repository.server(serverId)
@@ -287,6 +319,24 @@ private fun TerminalDestination(
             hostKeyVerifier = services.hostKeyVerifier,
             prompts = prompts,
         )
+        // Open the auto-start forwards before the shell, so a rule that fails is
+        // reported while the user is still on the connecting screen rather than
+        // silently not existing once they are inside the terminal.
+        val autoForwards = services.repository.forwardsFor(serverId).filter { it.autoStart }
+        if (autoForwards.isNotEmpty()) {
+            when (val started = ssh.startForwards(autoForwards)) {
+                is NeoResult.Ok -> {
+                    val failed = started.getOrThrow()
+                    if (failed.isNotEmpty()) {
+                        forwardProblem = failed.joinToString("; ") { (rule, reason) ->
+                            "${rule.bindHost}:${rule.bindPort} — $reason"
+                        }
+                    }
+                }
+                is NeoResult.Err -> forwardProblem = started.error.message
+            }
+        }
+
         val ts = TerminalSession(ssh, cols = 80, rows = 24)
         when (val started = ts.start()) {
             is NeoResult.Err -> problem = started.error.message
@@ -305,6 +355,8 @@ private fun TerminalDestination(
                 title = title.ifBlank { stringResource(R.string.nav_terminal) },
                 onBack = onBack,
                 onOpenSftp = onOpenSftp,
+                prefs = prefs,
+                forwardProblem = forwardProblem,
             )
             failure != null -> Text(
                 text = if (failure == "server_gone") {

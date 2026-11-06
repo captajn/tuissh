@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import com.tuissh.app.di.Graph
 import com.tuissh.app.i18n.LocaleEngine
+import com.tuissh.app.ui.settings.SettingsViewModel
+import com.tuissh.app.ui.theme.AppThemeMode
+import com.tuissh.app.ui.theme.ThemeState
 import com.tuissh.app.ui.theme.TuiSshTheme
 
 /**
@@ -55,6 +58,9 @@ class NeoActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val themePref = getSharedPreferences(SettingsViewModel.THEME_PREFS, Context.MODE_PRIVATE)
+            .getString(SettingsViewModel.THEME_KEY, null)
+        ThemeState.mode.value = AppThemeMode.from(themePref)
         Graph.init(applicationContext)
         enableEdgeToEdge()
         setContent {

@@ -35,6 +35,10 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
+import com.tuissh.app.ui.theme.LocalMacOsColors
+import com.tuissh.app.ui.theme.liquidGlassCard
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,13 +71,20 @@ fun ForwardListScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val tokens = LocalMacOsColors.current
     var pendingDelete by remember { mutableStateOf<ForwardEntity?>(null) }
 
     LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                ),
                 title = {
                     Column {
                         Text(
@@ -98,6 +109,9 @@ fun ForwardListScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
+                containerColor = tokens.primaryAccent,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
                 onClick = viewModel::startNew,
                 icon = { Icon(Icons.Default.Add, null) },
                 text = { Text(stringResource(R.string.forward_add)) },
@@ -107,7 +121,8 @@ fun ForwardListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(tokens.windowBackground),
         ) {
             state.error?.let { message ->
                 Text(
@@ -193,6 +208,7 @@ private fun describe(rule: ForwardEntity): String = when (rule.kind) {
 
 @Composable
 private fun ForwardRow(rule: ForwardEntity, onDelete: () -> Unit) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,7 +223,7 @@ private fun ForwardRow(rule: ForwardEntity, onDelete: () -> Unit) {
             },
             style = MaterialTheme.typography.labelLarge,
             fontFamily = FontFamily.Monospace,
-            color = TuiPalette.Amber,
+            color = tokens.primaryAccent,
             modifier = Modifier.width(34.dp),
         )
         Column(
@@ -225,7 +241,7 @@ private fun ForwardRow(rule: ForwardEntity, onDelete: () -> Unit) {
                 text = describe(rule),
                 style = MaterialTheme.typography.labelSmall,
                 fontFamily = FontFamily.Monospace,
-                color = TuiPalette.TextSecondary,
+                color = tokens.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -233,7 +249,7 @@ private fun ForwardRow(rule: ForwardEntity, onDelete: () -> Unit) {
                 Text(
                     text = stringResource(R.string.forward_auto_start),
                     style = MaterialTheme.typography.labelSmall,
-                    color = TuiPalette.Success,
+                    color = tokens.statusGreen,
                 )
             }
         }
@@ -241,7 +257,7 @@ private fun ForwardRow(rule: ForwardEntity, onDelete: () -> Unit) {
             Icon(
                 Icons.Default.Delete,
                 contentDescription = stringResource(R.string.server_action_delete),
-                tint = TuiPalette.TextSecondary,
+                tint = tokens.textSecondary,
                 modifier = Modifier.size(20.dp),
             )
         }

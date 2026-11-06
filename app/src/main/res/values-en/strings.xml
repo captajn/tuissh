@@ -209,6 +209,10 @@
     <string name="server_auth_method">Sign in with</string>
     <string name="server_auth_password">Password</string>
     <string name="server_auth_key">Private key</string>    <!-- Settings -->
+    <string name="settings_appearance">Appearance (macOS 27 Liquid Glass)</string>
+    <string name="settings_theme_dark">macOS Dark</string>
+    <string name="settings_theme_light">macOS Light</string>
+    <string name="settings_theme_system">System</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_restart">Changing the language needs an app restart.</string>
     <string name="settings_terminal">Terminal</string>
@@ -231,4 +235,5 @@
     <string name="forward_auto_start">Start on connect</string>
     <string name="forward_delete_title">Delete this rule?</string>    <string name="server_bastion">Jump host (ProxyJump)</string>
     <string name="server_bastion_none">No other server is available as a jump host.</string>
-    <string name="server_bastion_direct">Connect directly</string></resources>
+    <string name="server_bastion_direct">Connect directly</string>    <string name="forward_failed">Could not open: %1$s</string>
+</resources>

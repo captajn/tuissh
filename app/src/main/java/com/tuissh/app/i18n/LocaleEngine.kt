@@ -49,13 +49,33 @@ object LocaleEngine {
      * (`cmd locale get-app-locales` reflects it); older versions rely on
      * [wrap] having run before `onCreate`.
      */
-    fun apply(activity: Activity, tag: String) {
+    /**
+     * Update the platform locale on API 33+, where the system tracks it per app.
+     *
+     * Below 33 there is no per-app locale service, so the caller has to re-create the
+     * activity itself; [apply] does nothing there and reports false so the caller knows
+     * a restart is needed.
+     */
+    fun apply(activity: Activity, tag: String): Boolean {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            runCatching {
+            return runCatching {
                 val manager = activity.getSystemService(android.app.LocaleManager::class.java)
                 manager?.applicationLocales = LocaleList.forLanguageTags(tag)
-            }
+            }.isSuccess
         }
+        return false
+    }
+
+    /**
+     * Re-create the activity so the new locale takes effect.
+     *
+     * This is what makes a language change feel finished: without it the user has to
+     * kill the app and reopen it, which most people read as the setting not working.
+     * `recreate()` keeps the back stack, so the user lands back where they were.
+     */
+    fun restartFor(activity: Activity, tag: String) {
+        apply(activity, tag)
+        activity.recreate()
     }
 
     /** True when the device language is already one the app ships. */

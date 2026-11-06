@@ -1,6 +1,8 @@
 package com.tuissh.app.ui.terminal
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -24,27 +26,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.tuissh.app.terminal.input.TerminalKeyBar
 import com.tuissh.app.terminal.input.TerminalKeyBar.BarKey
-
-private val BarBackground = Color(0xFF101820)
-private val KeyIdle = Color(0xFF1E2A36)
-private val KeyText = Color(0xFFE8EEF4)
-private val KeyAccent = Color(0xFF3DDC97)
+import com.tuissh.app.ui.theme.LocalMacOsColors
 
 /**
- * Fixed key bar for the terminal.
- *
- * A phone keyboard cannot produce Ctrl-C, Esc or an arrow key, so the terminal has to
- * supply them. Modifiers are sticky: tap Ctrl, then C, and exactly one Ctrl-C is sent.
- * That is the only interaction that works one-handed.
- *
- * Rows scroll horizontally instead of wrapping: a wrapped bar changes height whenever
- * the layout changes, which makes the terminal grid jump under the user's finger.
- *
- * The bar does not know about the SSH session; it encodes bytes and hands them over.
+ * macOS 27 Magic Keyboard style auxiliary key bar for the terminal.
  */
 @Composable
 fun TerminalKeyBarView(
@@ -53,12 +43,17 @@ fun TerminalKeyBarView(
     modifier: Modifier = Modifier,
     rows: List<List<BarKey>> = TerminalKeyBar.DefaultRows,
 ) {
+    val tokens = LocalMacOsColors.current
     var modifiers by remember { mutableStateOf(TerminalKeyBar.ModifierState()) }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(BarBackground),
+            .background(tokens.keyBarTray)
+            .border(
+                BorderStroke(0.75.dp, tokens.specularBorderTop),
+            )
+            .padding(vertical = 3.dp),
     ) {
         for (row in rows) {
             Row(
@@ -71,7 +66,7 @@ fun TerminalKeyBarView(
             ) {
                 for (key in row) {
                     if (key is BarKey.Spacer) {
-                        Box(Modifier.width(8.dp).height(34.dp))
+                        Box(Modifier.width(8.dp).height(32.dp))
                         continue
                     }
                     val latched = when (key) {
@@ -97,19 +92,30 @@ fun TerminalKeyBarView(
 
 @Composable
 private fun KeyButton(label: String, latched: Boolean, onClick: () -> Unit) {
+    val tokens = LocalMacOsColors.current
+    val keyShape = RoundedCornerShape(7.dp)
+
     Box(
         modifier = Modifier
-            .height(34.dp)
-            .width(if (label.length > 2) 62.dp else 40.dp)
-            .clip(RoundedCornerShape(6.dp))
-            .background(if (latched) KeyAccent else KeyIdle)
+            .height(32.dp)
+            .width(if (label.length > 2) 58.dp else 38.dp)
+            .clip(keyShape)
+            .background(if (latched) tokens.primaryAccent else tokens.keycapSurface)
+            .border(
+                BorderStroke(
+                    width = 0.75.dp,
+                    color = if (latched) tokens.primaryAccent else tokens.keycapBorder,
+                ),
+                shape = keyShape,
+            )
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = label,
-            color = if (latched) BarBackground else KeyText,
-            fontSize = 13.sp,
+            color = if (latched) Color.White else tokens.textPrimary,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium,
             fontFamily = FontFamily.Monospace,
             maxLines = 1,
         )

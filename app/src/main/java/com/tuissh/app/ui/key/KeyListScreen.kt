@@ -33,6 +33,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Color
+import com.tuissh.app.ui.theme.LocalMacOsColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -68,14 +71,21 @@ fun KeyListScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val tokens = LocalMacOsColors.current
     var importing by remember { mutableStateOf(false) }
     var pendingDelete by remember { mutableStateOf<PrivateKeyEntity?>(null) }
 
     LaunchedEffect(Unit) { viewModel.load() }
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                ),
                 title = {
                     Column {
                         Text(
@@ -100,6 +110,9 @@ fun KeyListScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
+                containerColor = tokens.primaryAccent,
+                contentColor = Color.White,
+                shape = RoundedCornerShape(16.dp),
                 onClick = { importing = true },
                 icon = { Icon(Icons.Default.Add, null) },
                 text = { Text(stringResource(R.string.key_import)) },
@@ -109,7 +122,8 @@ fun KeyListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(tokens.windowBackground),
         ) {
             state.error?.let { message ->
                 Text(
@@ -384,12 +398,13 @@ fun KeyPickerRow(
     onSelect: (PrivateKeyEntity) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tokens = com.tuissh.app.ui.theme.LocalMacOsColors.current
     Column(modifier = modifier.fillMaxWidth()) {
         if (keys.isEmpty()) {
             Text(
                 text = stringResource(R.string.key_none_yet),
                 style = MaterialTheme.typography.labelSmall,
-                color = TuiPalette.TextSecondary,
+                color = tokens.textSecondary,
                 modifier = Modifier.padding(vertical = 6.dp),
             )
         }
@@ -399,8 +414,8 @@ fun KeyPickerRow(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(8.dp))
                     .background(
-                        if (key.id == selectedId) TuiPalette.Amber.copy(alpha = 0.12f)
-                        else TuiPalette.InkRaised,
+                        if (key.id == selectedId) tokens.selectionPill
+                        else tokens.surfaceGlass,
                     )
                     .clickable { onSelect(key) }
                     .padding(horizontal = 10.dp, vertical = 8.dp),
@@ -410,13 +425,13 @@ fun KeyPickerRow(
                 Icon(
                     Icons.Default.VpnKey,
                     contentDescription = null,
-                    tint = if (key.id == selectedId) TuiPalette.Amber else TuiPalette.TextSecondary,
+                    tint = if (key.id == selectedId) tokens.primaryAccent else tokens.textSecondary,
                     modifier = Modifier.size(18.dp),
                 )
                 Text(
                     text = key.name,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (key.id == selectedId) TuiPalette.TextPrimary else TuiPalette.TextSecondary,
+                    color = if (key.id == selectedId) tokens.textPrimary else tokens.textSecondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

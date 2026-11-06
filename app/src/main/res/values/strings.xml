@@ -210,6 +210,10 @@
     <string name="server_auth_method">Cách đăng nhập</string>
     <string name="server_auth_password">Mật khẩu</string>
     <string name="server_auth_key">Khóa riêng</string>    <!-- Settings -->
+    <string name="settings_appearance">Giao diện (macOS 27 Liquid Glass)</string>
+    <string name="settings_theme_dark">Tối macOS</string>
+    <string name="settings_theme_light">Sáng macOS</string>
+    <string name="settings_theme_system">Hệ thống</string>
     <string name="settings_language">Ngôn ngữ</string>
     <string name="settings_language_restart">Đổi ngôn ngữ cần mở lại app.</string>
     <string name="settings_terminal">Terminal</string>
@@ -232,4 +236,5 @@
     <string name="forward_auto_start">Tự mở khi kết nối</string>
     <string name="forward_delete_title">Xoá quy tắc này?</string>    <string name="server_bastion">Máy trung chuyển (ProxyJump)</string>
     <string name="server_bastion_none">Chưa có máy chủ nào khác để làm trung chuyển.</string>
-    <string name="server_bastion_direct">Kết nối trực tiếp</string></resources>
+    <string name="server_bastion_direct">Kết nối trực tiếp</string>    <string name="forward_failed">Không mở được cổng: %1$s</string>
+</resources>

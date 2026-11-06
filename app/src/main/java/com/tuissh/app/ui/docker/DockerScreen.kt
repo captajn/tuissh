@@ -32,6 +32,11 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.tuissh.app.ui.theme.LocalMacOsColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,10 +67,18 @@ fun DockerScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val tokens = LocalMacOsColors.current
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                    actionIconContentColor = tokens.primaryAccent,
+                ),
                 title = {
                     Column {
                         Text(
@@ -97,9 +110,22 @@ fun DockerScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(tokens.windowBackground),
         ) {
-            TabRow(selectedTabIndex = state.tab.ordinal) {
+            TabRow(
+                selectedTabIndex = state.tab.ordinal,
+                containerColor = tokens.chromeGlassBar,
+                contentColor = tokens.primaryAccent,
+                indicator = { tabPositions ->
+                    if (state.tab.ordinal < tabPositions.size) {
+                        TabRowDefaults.SecondaryIndicator(
+                            Modifier.tabIndicatorOffset(tabPositions[state.tab.ordinal]),
+                            color = tokens.primaryAccent,
+                        )
+                    }
+                },
+            ) {
                 DockerViewModel.Tab.entries.forEach { tab ->
                     Tab(
                         selected = state.tab == tab,
@@ -183,19 +209,20 @@ fun DockerScreen(
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFF101820))
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(tokens.terminalBg)
                         .padding(8.dp),
                 ) {
                     if (state.logsLoading) {
                         Text(
                             stringResource(R.string.docker_logs_loading),
-                            color = Color(0xFFE8EEF4),
+                            color = tokens.terminalFg,
                             style = MaterialTheme.typography.bodySmall,
                         )
                     } else {
                         Text(
                             text = state.logs.ifBlank { stringResource(R.string.docker_logs_empty) },
-                            color = Color(0xFFE8EEF4),
+                            color = tokens.terminalFg,
                             fontFamily = FontFamily.Monospace,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -256,6 +283,7 @@ private fun ContainerRow(
     onRestart: () -> Unit,
     onLogs: () -> Unit,
 ) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -267,7 +295,7 @@ private fun ContainerRow(
                 .size(10.dp)
                 .clip(CircleShape)
                 .background(
-                    if (container.isRunning) Color(0xFF3DDC97) else Color(0xFF8A94A6),
+                    if (container.isRunning) tokens.statusGreen else tokens.textTertiary,
                 ),
         )
         Column(

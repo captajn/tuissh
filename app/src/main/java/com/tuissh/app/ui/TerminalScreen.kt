@@ -1,5 +1,7 @@
 package com.tuissh.app.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -32,6 +34,14 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import com.tuissh.app.R
 import com.tuissh.app.ui.settings.TerminalPrefs
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.clip
+import com.tuissh.app.ui.theme.LocalMacOsColors
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,7 +71,15 @@ fun TerminalScreen(
     onOpenSftp: () -> Unit = {},
     /** Appearance from Settings; the values used to be stored and never read. */
     prefs: TerminalPrefs = TerminalPrefs(),
+    /** Set when an auto-start forwarding rule could not bind. */
+    forwardProblem: String? = null,
 ) {
+    val tokens = LocalMacOsColors.current
+    val effectivePalette = if (palette.background == Color(0xFF000000) && palette.foreground == Color(0xFFE5E5E5)) {
+        TerminalPalette.default(tokens.isDark)
+    } else {
+        palette
+    }
     val state by session.state.collectAsState()
     val remoteTitle by session.title.collectAsState()
     val grid by session.size.collectAsState()
@@ -74,20 +92,30 @@ fun TerminalScreen(
     val focus = LocalFocusManager.current
 
     Scaffold(
+        containerColor = effectivePalette.background,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                    actionIconContentColor = tokens.textPrimary,
+                ),
                 title = {
                     Column {
-                        Text(remoteTitle.ifBlank { title }, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            remoteTitle.ifBlank { title },
+                            style = MaterialTheme.typography.titleMedium,
+                            color = tokens.textPrimary,
+                        )
                         Text(
                             text = statusLine(state, grid.cols, grid.rows),
                             style = MaterialTheme.typography.labelSmall,
+                            color = tokens.textSecondary,
                         )
                     }
                 },
                 navigationIcon = {
-                    // An icon, not the word "Back": a text label in the navigation
-                    // slot is squeezed to a couple of characters on narrow layouts.
                     androidx.compose.material3.IconButton(onClick = onBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -96,10 +124,11 @@ fun TerminalScreen(
                     }
                 },
                 actions = {
-                    androidx.compose.material3.IconButton(onClick = onOpenSftp) {
+                    androidx.compose.material3.TextButton(onClick = onOpenSftp) {
                         Text(
                             text = stringResource(R.string.nav_sftp),
                             style = MaterialTheme.typography.labelLarge,
+                            color = tokens.primaryAccent,
                         )
                     }
                 },
@@ -110,21 +139,15 @@ fun TerminalScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                // The key bar must sit directly above the soft keyboard. Without
-                // imePadding the keyboard covers it and the terminal becomes
-                // unusable the moment the user starts typing.
+                .background(effectivePalette.background)
                 .imePadding(),
         ) {
             NeoTerminalView(
                 emulator = session.emulator,
-                palette = palette,
+                palette = effectivePalette,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    // Edge-to-edge puts the canvas against the physical screen edge,
-                    // where the first glyph column is clipped by the display cutout
-                    // and the glyph's own left bearing. A small inset keeps column 0
-                    // readable without wasting meaningful width.
                     .padding(horizontal = 4.dp),
                 onResize = { cols, rows -> session.resize(cols, rows) },
                 onScrollChanged = { scrolledBack = it },
@@ -132,12 +155,10 @@ fun TerminalScreen(
                 cursorBlink = prefs.cursorBlink,
             )
 
-            // While reading history the terminal must say so, otherwise new output
-            // arriving off-screen looks like the app has stopped responding.
             if (scrolledBack > 0) {
                 androidx.compose.material3.Surface(
-                    color = com.tuissh.app.ui.theme.TuiPalette.Amber,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(12.dp),
+                    color = tokens.statusOrange,
+                    shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .padding(8.dp)
                         .align(androidx.compose.ui.Alignment.CenterHorizontally),
@@ -145,60 +166,83 @@ fun TerminalScreen(
                     Text(
                         text = stringResource(R.string.terminal_scrolled_back, scrolledBack),
                         style = MaterialTheme.typography.labelSmall,
-                        color = com.tuissh.app.ui.theme.TuiPalette.Ink,
+                        color = Color.White,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
                     )
                 }
             }
 
-            // Single-line command entry. A real terminal needs raw key events; this
-            // input row keeps the app usable until the soft keyboard drives the
-            // session directly, and it uses the same encoders as the key bar.
-            //
-            // Order matters: the input row sits ABOVE the key bar so the bar is the
-            // last thing before the keyboard, within thumb reach. Putting the bar
-            // above the input row forces the user to reach past the text field.
+            // A forwarding rule that did not bind is shown here rather than as a toast:
+            // the user needs to see which rule failed while they are in the session.
+            forwardProblem?.let { message ->
+                Text(
+                    text = stringResource(R.string.forward_failed, message),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                )
+            }
+
+            // Command entry in macOS 27 glass pill capsule
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                    .background(tokens.keyBarTray)
+                    .padding(horizontal = 8.dp, vertical = 5.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
             ) {
-                BasicTextField(
-                    value = input,
-                    onValueChange = { input = it },
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(8.dp),
-                    textStyle = TextStyle(
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                    ),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Ascii,
-                        imeAction = ImeAction.Send,
-                    ),
-                    decorationBox = { inner ->
-                        if (input.isEmpty()) {
-                            Text(stringResource(R.string.terminal_input_hint), style = MaterialTheme.typography.bodySmall)
-                        }
-                        inner()
-                    },
-                )
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(tokens.surfaceElevated)
+                        .border(
+                            BorderStroke(0.75.dp, tokens.specularBorderTop),
+                            shape = RoundedCornerShape(20.dp),
+                        )
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                ) {
+                    BasicTextField(
+                        value = input,
+                        onValueChange = { input = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = TextStyle(
+                            fontSize = 13.sp,
+                            color = tokens.textPrimary,
+                            fontFamily = FontFamily.Monospace,
+                        ),
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Ascii,
+                            imeAction = ImeAction.Send,
+                        ),
+                        decorationBox = { inner ->
+                            if (input.isEmpty()) {
+                                Text(
+                                    stringResource(R.string.terminal_input_hint),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = tokens.textTertiary,
+                                )
+                            }
+                            inner()
+                        },
+                    )
+                }
                 androidx.compose.material3.Button(
                     onClick = {
-                        // Text first, then Enter. Sending the carriage return before
-                        // the command runs an empty line and kills some shells.
                         session.submitLine(input)
                         input = ""
                         focus.clearFocus()
                     },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = tokens.primaryAccent,
+                        contentColor = Color.White,
+                    ),
+                    shape = RoundedCornerShape(16.dp),
                 ) { Text(stringResource(R.string.terminal_send)) }
             }
 
-            // Fixed key bar. A soft keyboard has no Ctrl, Esc or arrows, so the
-            // terminal supplies them; without this the session is read-only for any
-            // full-screen program. Kept last so it sits against the keyboard.
+            // macOS 27 Magic Key Bar
             TerminalKeyBarView(
                 appCursor = session.emulator.isModeSet(TerminalMode.APPLICATION_CURSOR),
                 onBytes = { bytes -> session.send(bytes) },

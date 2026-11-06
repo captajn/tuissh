@@ -26,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -36,12 +37,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tuissh.app.R
 import com.tuissh.app.monitor.MonitorParsers
 import com.tuissh.app.ui.localized
+import com.tuissh.app.ui.theme.LocalMacOsColors
 import com.tuissh.app.ui.theme.TuiPalette
+import com.tuissh.app.ui.theme.liquidGlassCard
 import kotlin.math.roundToInt
 
 /**
@@ -58,6 +62,7 @@ fun MonitorScreen(
     onBack: () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
+    val tokens = LocalMacOsColors.current
 
     DisposableEffect(Unit) {
         viewModel.start()
@@ -65,8 +70,15 @@ fun MonitorScreen(
     }
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                    actionIconContentColor = tokens.primaryAccent,
+                ),
                 title = {
                     Column {
                         Text(
@@ -101,7 +113,8 @@ fun MonitorScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(tokens.windowBackground),
         ) {
             if (state.loading && state.snapshot == null) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -158,28 +171,33 @@ fun MonitorScreen(
 
 @Composable
 private fun SectionTitle(text: String) {
+    val tokens = LocalMacOsColors.current
     Text(
-        text = text,
-        style = MaterialTheme.typography.labelLarge,
-        color = TuiPalette.Amber,
-        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 18.dp, bottom = 8.dp),
+        text = text.uppercase(),
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.Bold,
+        color = tokens.primaryAccent,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 8.dp),
     )
 }
 
 @Composable
 private fun CpuCard(cpu: MonitorParsers.CpuSnapshot?, warmingUp: Boolean) {
+    val tokens = LocalMacOsColors.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .liquidGlassCard(RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Text(stringResource(R.string.monitor_cpu), style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.monitor_cpu), style = MaterialTheme.typography.titleSmall, color = tokens.textPrimary)
             Text(
                 // A percentage needs two samples; showing 0% during the first poll
                 // would look like an idle host rather than an unfinished read.
@@ -189,8 +207,9 @@ private fun CpuCard(cpu: MonitorParsers.CpuSnapshot?, warmingUp: Boolean) {
                     "${(cpu.userPercent + cpu.systemPercent).roundToInt()}%"
                 },
                 style = MaterialTheme.typography.titleLarge,
-                color = TuiPalette.Amber,
+                color = tokens.primaryAccent,
                 fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
             )
         }
 
@@ -211,18 +230,19 @@ private fun CpuCard(cpu: MonitorParsers.CpuSnapshot?, warmingUp: Boolean) {
 /**
  * Three-segment bar: user, system, io wait.
  *
- * Colour carries meaning — amber for user work, violet for kernel, grey for waiting on
+ * Colour carries meaning — primary accent for user work, secondary accent for kernel, grey for waiting on
  * disk — so the bar can be read without the legend.
  */
 @Composable
 private fun Meter(user: Float, system: Float, iowait: Float) {
+    val tokens = LocalMacOsColors.current
     val total = (user + system + iowait).coerceAtMost(100f).coerceAtLeast(0f)
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(10.dp)
             .clip(RoundedCornerShape(5.dp))
-            .background(TuiPalette.InkCard),
+            .background(tokens.surfaceElevated),
     ) {
         val scale = if (total <= 0f) 0f else 1f
         if (user > 0f) {
@@ -230,7 +250,7 @@ private fun Meter(user: Float, system: Float, iowait: Float) {
                 Modifier
                     .weight(user * scale + 0.0001f)
                     .fillMaxSize()
-                    .background(TuiPalette.Amber),
+                    .background(tokens.primaryAccent),
             )
         }
         if (system > 0f) {
@@ -238,7 +258,7 @@ private fun Meter(user: Float, system: Float, iowait: Float) {
                 Modifier
                     .weight(system * scale + 0.0001f)
                     .fillMaxSize()
-                    .background(TuiPalette.Violet),
+                    .background(tokens.secondaryAccent),
             )
         }
         if (iowait > 0f) {
@@ -246,7 +266,7 @@ private fun Meter(user: Float, system: Float, iowait: Float) {
                 Modifier
                     .weight(iowait * scale + 0.0001f)
                     .fillMaxSize()
-                    .background(TuiPalette.TextDisabled),
+                    .background(tokens.textTertiary),
             )
         }
         val remainder = 100f - total
@@ -255,7 +275,7 @@ private fun Meter(user: Float, system: Float, iowait: Float) {
                 Modifier
                     .weight(remainder + 0.0001f)
                     .fillMaxSize()
-                    .background(TuiPalette.InkCard),
+                    .background(tokens.surfaceElevated),
             )
         }
     }
@@ -263,35 +283,40 @@ private fun Meter(user: Float, system: Float, iowait: Float) {
 
 @Composable
 private fun Metric(label: String, value: String) {
+    val tokens = LocalMacOsColors.current
     Column {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = TuiPalette.TextSecondary)
-        Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = tokens.textSecondary)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontFamily = FontFamily.Monospace, color = tokens.textPrimary)
     }
 }
 
 @Composable
 private fun MemoryCard(memory: MonitorParsers.MemoryInfo?) {
     if (memory == null) return
+    val tokens = LocalMacOsColors.current
     val fraction = if (memory.totalKb <= 0) 0f else {
         (memory.usedKb.toFloat() / memory.totalKb.toFloat()).coerceIn(0f, 1f)
     }
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .liquidGlassCard(RoundedCornerShape(16.dp))
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.Bottom,
         ) {
-            Text(stringResource(R.string.monitor_memory), style = MaterialTheme.typography.labelLarge)
+            Text(stringResource(R.string.monitor_memory), style = MaterialTheme.typography.titleSmall, color = tokens.textPrimary)
             Text(
                 "${(fraction * 100).roundToInt()}%",
                 style = MaterialTheme.typography.titleLarge,
-                color = TuiPalette.Amber,
+                color = tokens.primaryAccent,
                 fontFamily = FontFamily.Monospace,
+                fontWeight = FontWeight.Bold,
             )
         }
         Box(
@@ -299,13 +324,13 @@ private fun MemoryCard(memory: MonitorParsers.MemoryInfo?) {
                 .fillMaxWidth()
                 .height(10.dp)
                 .clip(RoundedCornerShape(5.dp))
-                .background(TuiPalette.InkCard),
+                .background(tokens.surfaceElevated),
         ) {
             Box(
                 Modifier
                     .fillMaxWidth(fraction)
                     .fillMaxSize()
-                    .background(if (fraction > 0.9f) TuiPalette.Danger else TuiPalette.Violet),
+                    .background(if (fraction > 0.9f) tokens.statusRed else tokens.primaryAccent),
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -331,6 +356,7 @@ private fun MemoryCard(memory: MonitorParsers.MemoryInfo?) {
 
 @Composable
 private fun DiskRow(disk: MonitorParsers.DiskInfo) {
+    val tokens = LocalMacOsColors.current
     Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -348,9 +374,9 @@ private fun DiskRow(disk: MonitorParsers.DiskInfo) {
                 style = MaterialTheme.typography.bodyMedium,
                 fontFamily = FontFamily.Monospace,
                 color = when {
-                    disk.usedPercent >= 90 -> TuiPalette.Danger
-                    disk.usedPercent >= 75 -> TuiPalette.Amber
-                    else -> TuiPalette.TextPrimary
+                    disk.usedPercent >= 90 -> tokens.statusRed
+                    disk.usedPercent >= 75 -> tokens.statusOrange
+                    else -> tokens.textPrimary
                 },
             )
         }
@@ -359,7 +385,7 @@ private fun DiskRow(disk: MonitorParsers.DiskInfo) {
                 MonitorParsers.formatBytes(disk.totalBytes) +
                 "  ·  " + disk.filesystem,
             style = MaterialTheme.typography.labelSmall,
-            color = TuiPalette.TextSecondary,
+            color = tokens.textSecondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -368,6 +394,7 @@ private fun DiskRow(disk: MonitorParsers.DiskInfo) {
 
 @Composable
 private fun ProcessRow(process: MonitorParsers.ProcessInfo, onKill: () -> Unit) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -387,7 +414,7 @@ private fun ProcessRow(process: MonitorParsers.ProcessInfo, onKill: () -> Unit) 
                     "cpu ${"%.1f".format(process.cpuPercent)}%  ·  " +
                     "mem ${"%.1f".format(process.memPercent)}%",
                 style = MaterialTheme.typography.labelSmall,
-                color = TuiPalette.TextSecondary,
+                color = tokens.textSecondary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
@@ -396,7 +423,7 @@ private fun ProcessRow(process: MonitorParsers.ProcessInfo, onKill: () -> Unit) 
             Text(
                 stringResource(R.string.monitor_kill),
                 style = MaterialTheme.typography.labelSmall,
-                color = TuiPalette.Danger,
+                color = tokens.statusRed,
             )
         }
     }

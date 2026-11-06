@@ -1,6 +1,8 @@
 package com.tuissh.app.ui.sftp
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,22 +16,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.Upload
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.Folder
-import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -47,6 +47,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -56,22 +57,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tuissh.app.R
 import com.tuissh.app.core.NeoFormat
 import com.tuissh.app.sftp.SftpClient
 import com.tuissh.app.ui.localized
+import com.tuissh.app.ui.theme.LocalMacOsColors
+import com.tuissh.app.ui.theme.liquidGlassCard
 
 /**
- * SFTP file browser.
- *
- * Replaces `SFTPBrowserScreen` from the original app: path breadcrumb, sortable
- * listing, multi-select, and the file operations that live behind the overflow menu.
- * Transfers are delegated to the caller through stream callbacks so this screen does
- * not need to know about SAF or app storage.
+ * SFTP file browser with macOS 27 Liquid Glass aesthetic.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +84,7 @@ fun SftpBrowserScreen(
     onDownloadRequest: (SftpClient.Entry) -> Unit,
     onOpenFile: (SftpClient.Entry) -> Unit = {},
 ) {
+    val tokens = LocalMacOsColors.current
     val state by viewModel.state.collectAsState()
     val context = androidx.compose.ui.platform.LocalContext.current
     var menuOpen by remember { mutableStateOf(false) }
@@ -89,13 +92,23 @@ fun SftpBrowserScreen(
     var message by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
+        containerColor = tokens.windowBackground,
         topBar = {
             TopAppBar(
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = tokens.chromeGlassBar,
+                    titleContentColor = tokens.textPrimary,
+                    navigationIconContentColor = tokens.textPrimary,
+                    actionIconContentColor = tokens.textPrimary,
+                ),
                 title = {
                     Column {
                         Text(
-                            text = state.path.substringAfterLast('/').ifEmpty { "/" },
-                            style = MaterialTheme.typography.titleMedium,
+                            text = state.path.ifBlank { "/" },
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontSize = 16.sp,
+                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
@@ -108,6 +121,7 @@ fun SftpBrowserScreen(
                                 }
                             },
                             style = MaterialTheme.typography.labelSmall,
+                            color = tokens.textSecondary,
                             maxLines = 1,
                         )
                     }
@@ -123,30 +137,41 @@ fun SftpBrowserScreen(
                     IconButton(onClick = viewModel::refresh) {
                         Icon(Icons.Default.Refresh, stringResource(R.string.common_refresh))
                     }
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ExitToApp,
+                            contentDescription = stringResource(R.string.server_back),
+                            tint = tokens.textSecondary,
+                        )
+                    }
                     IconButton(onClick = { menuOpen = true }) {
                         Icon(Icons.Default.MoreVert, null)
                     }
-                    DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenu(
+                        expanded = menuOpen,
+                        onDismissRequest = { menuOpen = false },
+                        modifier = Modifier.background(tokens.surfaceElevated),
+                    ) {
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sftp_sort_name)) },
-                            leadingIcon = { Icon(Icons.Default.SortByAlpha, null) },
+                            text = { Text(stringResource(R.string.sftp_sort_name), color = tokens.textPrimary) },
+                            leadingIcon = { Icon(Icons.Default.SortByAlpha, null, tint = tokens.textSecondary) },
                             onClick = { viewModel.toggleSort(SftpBrowserViewModel.SortBy.NAME); menuOpen = false },
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sftp_sort_size)) },
+                            text = { Text(stringResource(R.string.sftp_sort_size), color = tokens.textPrimary) },
                             onClick = { viewModel.toggleSort(SftpBrowserViewModel.SortBy.SIZE); menuOpen = false },
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sftp_sort_date)) },
+                            text = { Text(stringResource(R.string.sftp_sort_date), color = tokens.textPrimary) },
                             onClick = { viewModel.toggleSort(SftpBrowserViewModel.SortBy.MODIFIED); menuOpen = false },
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(color = tokens.dividerHairline)
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sftp_toggle_hidden)) },
+                            text = { Text(stringResource(R.string.sftp_toggle_hidden), color = tokens.textPrimary) },
                             onClick = { viewModel.toggleHidden(); menuOpen = false },
                         )
                         DropdownMenuItem(
-                            text = { Text(stringResource(R.string.sftp_new_folder)) },
+                            text = { Text(stringResource(R.string.sftp_new_folder), color = tokens.textPrimary) },
                             onClick = { actionDialog = ActionDialog.NewFolder; menuOpen = false },
                         )
                     }
@@ -157,11 +182,18 @@ fun SftpBrowserScreen(
             if (state.selectionCount > 0) {
                 ExtendedFloatingActionButton(
                     onClick = { actionDialog = ActionDialog.DeleteSelected },
-                    icon = { Icon(Icons.Default.Delete, null) },
-                    text = { Text(stringResource(R.string.sftp_delete_n, state.selectionCount)) },
+                    icon = { Icon(Icons.Default.Delete, null, tint = Color.White) },
+                    text = { Text(stringResource(R.string.sftp_delete_n, state.selectionCount), color = Color.White) },
+                    containerColor = tokens.statusRed,
+                    shape = RoundedCornerShape(16.dp),
                 )
             } else {
-                FloatingActionButton(onClick = onUploadRequest) {
+                FloatingActionButton(
+                    onClick = onUploadRequest,
+                    containerColor = tokens.primaryAccent,
+                    contentColor = Color.White,
+                    shape = RoundedCornerShape(16.dp),
+                ) {
                     Icon(Icons.Default.Upload, stringResource(R.string.sftp_upload))
                 }
             }
@@ -170,27 +202,50 @@ fun SftpBrowserScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                .background(tokens.windowBackground),
         ) {
             if (state.loading) {
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth(),
+                    color = tokens.primaryAccent,
+                    trackColor = tokens.surfaceGlass,
+                )
             }
 
             state.error?.let { err ->
                 Text(
                     text = err.localized(),
-                    color = MaterialTheme.colorScheme.error,
+                    color = tokens.statusRed,
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                 )
             }
 
-            if (state.entries.isEmpty() && !state.loading) {
+            if (state.entries.isEmpty() && !state.loading && !state.canGoUp) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.sftp_empty), style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(R.string.sftp_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = tokens.textSecondary,
+                    )
                 }
             } else {
-                LazyColumn(Modifier.fillMaxSize()) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                ) {
+                    // Parent directory entry ".."
+                    if (state.canGoUp) {
+                        item(key = "__parent_dir__") {
+                            ParentFolderRow(
+                                onClick = viewModel::goUp,
+                            )
+                            HorizontalDivider(color = tokens.dividerHairline)
+                        }
+                    }
+
                     items(state.visible, key = { it.path }) { entry ->
                         SftpRow(
                             entry = entry,
@@ -210,10 +265,11 @@ fun SftpBrowserScreen(
                                     onOpenFile(entry)
                                 }
                             },
-                            onLongClick = { viewModel.toggleSelection(entry.path) },
+                            onToggleSelect = { viewModel.toggleSelection(entry.path) },
+                            onLongClick = { actionDialog = ActionDialog.EntryActions(entry) },
                             onMenu = { actionDialog = ActionDialog.EntryActions(entry) },
                         )
-                        HorizontalDivider()
+                        HorizontalDivider(color = tokens.dividerHairline)
                     }
                 }
             }
@@ -243,7 +299,7 @@ fun SftpBrowserScreen(
                     viewModel.deleteSelected { failures ->
                         message = failures.firstOrNull()?.message
                     }
-                }) { Text(stringResource(R.string.server_action_delete)) }
+                }) { Text(stringResource(R.string.server_action_delete), color = tokens.statusRed) }
             },
             dismissButton = {
                 TextButton(onClick = { actionDialog = null }) {
@@ -256,23 +312,22 @@ fun SftpBrowserScreen(
             onDismissRequest = { actionDialog = null },
             title = { Text(dialog.entry.name, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             text = {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         "${stringResource(R.string.sftp_size)}: ${NeoFormat.bytes(dialog.entry.size)}",
                         style = MaterialTheme.typography.bodySmall,
+                        color = tokens.textPrimary,
                     )
                     Text(
                         "${stringResource(R.string.sftp_permissions)}: ${dialog.entry.permissionsText}",
                         style = MaterialTheme.typography.bodySmall,
+                        color = tokens.textSecondary,
                     )
                     dialog.entry.linkTarget?.let {
-                        Text("→ $it", style = MaterialTheme.typography.bodySmall)
+                        Text("→ $it", style = MaterialTheme.typography.bodySmall, color = tokens.secondaryAccent)
                     }
                 }
             },
-            // Two actions only. An earlier version put the download action in
-            // confirmButton and the copy action in dismissButton, which made the
-            // dialog look interactive but left "download" doing nothing visible.
             confirmButton = {
                 if (dialog.entry.isDirectory) {
                     TextButton(onClick = {
@@ -285,7 +340,7 @@ fun SftpBrowserScreen(
                         val entry = dialog.entry
                         actionDialog = null
                         onDownloadRequest(entry)
-                    }) { Text(stringResource(R.string.sftp_download)) }
+                    }) { Text(stringResource(R.string.sftp_download), color = tokens.primaryAccent) }
                 }
             },
             dismissButton = {
@@ -317,7 +372,7 @@ fun SftpBrowserScreen(
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error,
+                color = tokens.statusRed,
             )
         }
     }
@@ -330,6 +385,26 @@ private sealed interface ActionDialog {
     data class CopyPath(val entry: SftpClient.Entry) : ActionDialog
 }
 
+@Composable
+private fun ParentFolderRow(onClick: () -> Unit) {
+    val tokens = LocalMacOsColors.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        SftpFileIcons.FolderIcon(modifier = Modifier.size(28.dp))
+        Spacer(Modifier.size(14.dp))
+        Text(
+            text = "..",
+            style = MaterialTheme.typography.titleMedium,
+            color = tokens.textPrimary,
+        )
+    }
+}
+
 @OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
 @Composable
 private fun SftpRow(
@@ -338,56 +413,89 @@ private fun SftpRow(
     sizeLabel: String,
     dateLabel: String,
     onClick: () -> Unit,
+    onToggleSelect: () -> Unit,
     onLongClick: () -> Unit,
     onMenu: () -> Unit,
 ) {
+    val tokens = LocalMacOsColors.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
             .background(
-                if (selected) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surface,
+                if (selected) tokens.selectionPill
+                else Color.Transparent,
             )
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = when {
-                entry.isSymlink -> Icons.Outlined.Link
-                entry.isDirectory -> Icons.Outlined.Folder
-                else -> Icons.Outlined.Description
-            },
-            contentDescription = null,
-            modifier = Modifier.size(28.dp),
-            tint = when {
-                entry.isDirectory -> MaterialTheme.colorScheme.primary
-                entry.isSymlink -> MaterialTheme.colorScheme.tertiary
-                else -> MaterialTheme.colorScheme.onSurfaceVariant
-            },
-        )
-        Spacer(Modifier.size(16.dp))
+        SftpFileIcons.ItemIcon(entry = entry, modifier = Modifier.size(28.dp))
+        Spacer(Modifier.size(14.dp))
         Column(Modifier.weight(1f)) {
             Text(
                 text = entry.name,
                 style = MaterialTheme.typography.bodyLarge,
+                color = tokens.textPrimary,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (sizeLabel.isNotEmpty()) {
-                    Text(sizeLabel, style = MaterialTheme.typography.labelSmall)
-                }
-                if (dateLabel.isNotEmpty()) {
-                    Text(dateLabel, style = MaterialTheme.typography.labelSmall)
-                }
+            if (!entry.isDirectory && sizeLabel.isNotEmpty()) {
+                Text(
+                    text = sizeLabel,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = tokens.textSecondary,
+                    maxLines = 1,
+                )
             }
         }
-        if (selected) {
-            Icon(Icons.Default.Check, null, tint = MaterialTheme.colorScheme.primary)
-        }
+
+        // macOS Styled Checkbox
+        MacOsCheckbox(
+            checked = selected,
+            onToggle = onToggleSelect,
+        )
+
         IconButton(onClick = onMenu) {
-            Icon(Icons.Default.MoreVert, null, modifier = Modifier.size(20.dp))
+            Icon(
+                Icons.Default.MoreVert,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),
+                tint = tokens.textSecondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MacOsCheckbox(
+    checked: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val tokens = LocalMacOsColors.current
+    Box(
+        modifier = modifier
+            .size(20.dp)
+            .clip(RoundedCornerShape(5.dp))
+            .background(if (checked) tokens.primaryAccent else Color.Transparent)
+            .border(
+                BorderStroke(
+                    1.2.dp,
+                    if (checked) tokens.primaryAccent else tokens.specularBorderTop,
+                ),
+                shape = RoundedCornerShape(5.dp),
+            )
+            .clickable(onClick = onToggle),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (checked) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier.size(14.dp),
+            )
         }
     }
 }
@@ -467,15 +575,4 @@ private fun CopyPathDialog(
             }) { Text(stringResource(R.string.common_copy)) }
         },
     )
-}
-
-/** Empty-state helper used by the list when a directory has no readable entries. */
-@Composable
-private fun EmptyFolder() {
-    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator(Modifier.size(24.dp))
-            Text(stringResource(R.string.common_loading))
-        }
-    }
 }

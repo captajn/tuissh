@@ -1,10 +1,15 @@
 # Tui SSH
 
+<p align="center">
+  <a href="#vi"><img alt="Tiếng Việt" src="https://img.shields.io/badge/Tiếng_Việt-3DDC97?style=for-the-badge"></a>
+  <a href="#en"><img alt="English" src="https://img.shields.io/badge/English-A9A6BE?style=for-the-badge"></a>
+</p>
+
+<a id="vi"></a>
+
 Ứng dụng SSH cho Android, viết bằng Kotlin và Jetpack Compose: terminal VT, trình duyệt
 SFTP, xem tài nguyên máy chủ, quản lý container, và trợ lý AI có thể thao tác trên phiên
 kết nối.
-
-[English below](#english)
 
 ---
 
@@ -86,7 +91,12 @@ Chưa chọn. Hãy coi mã nguồn là bảo lưu mọi quyền cho tới khi c�
 
 ---
 
-<a id="english"></a>
+<a id="en"></a>
+
+<p align="center">
+  <a href="#vi"><img alt="Tiếng Việt" src="https://img.shields.io/badge/Tiếng_Việt-A9A6BE?style=for-the-badge"></a>
+  <a href="#en"><img alt="English" src="https://img.shields.io/badge/English-3DDC97?style=for-the-badge"></a>
+</p>
 
 ## English
 

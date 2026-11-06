@@ -39,6 +39,14 @@ class AiConversationRepositoryTest {
         override suspend fun latest(): AiConversationEntity? =
             conversations.maxByOrNull { it.updatedAt }
 
+        override suspend fun latestForServer(serverId: Long): AiConversationEntity? =
+            conversations
+                .filter { row ->
+                    // Mirrors the DAO's delimited match so id 1 does not match 11.
+                    row.selectedServerIds.split(',').any { it.trim() == serverId.toString() }
+                }
+                .maxByOrNull { it.updatedAt }
+
         override suspend fun insertConversation(entity: AiConversationEntity): Long {
             val id = if (entity.id == 0L) nextConversationId++ else entity.id
             entity.id.let { }
@@ -127,6 +135,34 @@ class AiConversationRepositoryTest {
 
         assertEquals("the newest conversation must be resumed", second, resumed)
         assertEquals("no extra conversation may be created", 2, dao.conversations.size)
+    }
+
+    @Test
+    fun `conversations are scoped per server`() = runBlocking {
+        val dao = FakeDao()
+        val repo = AiConversationRepository(dao)
+        val first = repo.resumeOrCreate("m", serverId = 1L)
+        repo.append(first, AiMessageEntity.ROLE_USER, "about server one")
+        val second = repo.resumeOrCreate("m", serverId = 2L)
+        repo.append(second, AiMessageEntity.ROLE_USER, "about server two")
+
+        assertEquals(first, repo.resumeOrCreate("m", serverId = 1L))
+        assertEquals(second, repo.resumeOrCreate("m", serverId = 2L))
+        assertEquals("each server keeps its own transcript", 2, dao.conversations.size)
+    }
+
+    @Test
+    fun `a server id does not match a longer id by prefix`() = runBlocking {
+        val dao = FakeDao()
+        val repo = AiConversationRepository(dao)
+        val forEleven = repo.resumeOrCreate("m", serverId = 11L)
+
+        val forOne = repo.resumeOrCreate("m", serverId = 1L)
+
+        assertTrue(
+            "server 1 must not inherit the conversation for server 11",
+            forOne != forEleven,
+        )
     }
 
     @Test

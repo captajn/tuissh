@@ -40,6 +40,8 @@ class AiChatViewModel(
      */
     private val history: AiConversationRepository? = null,
     private val modelIdForHistory: String = model,
+    /** Scopes history to one host, so two servers do not share a transcript. */
+    private val serverIdForHistory: Long? = null,
 ) : ViewModel() {
 
     /** Conversation row this chat is writing to, once [restore] has run. */
@@ -120,7 +122,7 @@ class AiChatViewModel(
         _state.value = _state.value.copy(input = "", sending = true, error = null)
 
         viewModelScope.launch {
-            val id = conversationId ?: history?.resumeOrCreate(modelIdForHistory)?.also {
+            val id = conversationId ?: history?.resumeOrCreate(modelIdForHistory, serverIdForHistory)?.also {
                 conversationId = it
             }
             if (id != null) {
@@ -253,7 +255,7 @@ class AiChatViewModel(
     fun restore() {
         val store = history ?: return
         viewModelScope.launch {
-            val id = store.resumeOrCreate(modelIdForHistory)
+            val id = store.resumeOrCreate(modelIdForHistory, serverIdForHistory)
             conversationId = id
             val stored = store.messages(id)
             if (stored.isEmpty()) return@launch

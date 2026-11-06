@@ -29,8 +29,14 @@ class AiConversationRepository(private val dao: AiConversationDao) {
      * Returns the id only; the caller loads messages separately so a large transcript
      * does not delay showing the screen.
      */
-    suspend fun resumeOrCreate(modelId: String): Long {
-        val existing = dao.latest()
+    /**
+     * Resume the newest conversation for [serverId], or start one.
+     *
+     * Scoped per server so opening the assistant on host B does not continue the
+     * transcript from host A.
+     */
+    suspend fun resumeOrCreate(modelId: String, serverId: Long? = null): Long {
+        val existing = if (serverId != null) dao.latestForServer(serverId) else dao.latest()
         if (existing != null) return existing.id
 
         return dao.insertConversation(
@@ -38,6 +44,7 @@ class AiConversationRepository(private val dao: AiConversationDao) {
                 title = NewChatTitle,
                 providerId = 0L,
                 modelId = modelId,
+                selectedServerIds = serverId?.toString().orEmpty(),
             ),
         )
     }

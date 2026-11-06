@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tuissh.app.data.model.ServerEntity
 import com.tuissh.app.data.repo.ServerRepository
+import com.tuissh.app.data.model.PrivateKeyEntity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -106,6 +107,15 @@ class ServerEditViewModel(
 
     private val _form = MutableStateFlow(Form())
     val form: StateFlow<Form> = _form.asStateFlow()
+
+    /**
+     * Keys available to this form.
+     *
+     * Collected here rather than in the screen so the list survives recomposition and
+     * is already loaded by the time the user switches to "private key".
+     */
+    val keys: StateFlow<List<PrivateKeyEntity>> = repository.observeKeys()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _saved = MutableStateFlow<Long?>(null)
     val saved: StateFlow<Long?> = _saved.asStateFlow()

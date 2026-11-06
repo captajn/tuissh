@@ -30,9 +30,26 @@ interface AiConversationDao {
     @Query("SELECT * FROM ai_conversations WHERE id = :id")
     suspend fun conversation(id: Long): AiConversationEntity?
 
-    /** Most recent conversation, used to resume where the user left off. */
+    /** Most recent conversation overall, used by the conversation list. */
     @Query("SELECT * FROM ai_conversations ORDER BY updatedAt DESC LIMIT 1")
     suspend fun latest(): AiConversationEntity?
+
+    /**
+     * Most recent conversation scoped to one server.
+     *
+     * A chat about one host is not a chat about another: resuming the newest
+     * conversation regardless of server mixed transcripts together and made the
+     * assistant answer about a machine the user was no longer looking at.
+     *
+     * `selectedServerIds` holds a comma-separated id list, and the match is done on the
+     * delimited string so server id 1 does not also match 11.
+     */
+    @Query(
+        "SELECT * FROM ai_conversations " +
+            "WHERE ',' || selectedServerIds || ',' LIKE '%,' || :serverId || ',%' " +
+            "ORDER BY updatedAt DESC LIMIT 1",
+    )
+    suspend fun latestForServer(serverId: Long): AiConversationEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertConversation(entity: AiConversationEntity): Long

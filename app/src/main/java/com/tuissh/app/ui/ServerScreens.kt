@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.tuissh.app.R
+import com.tuissh.app.ui.key.KeyPickerRow
 import androidx.compose.ui.unit.dp
 import com.tuissh.app.data.model.ServerEntity
 import com.tuissh.app.ui.server.ServerEditViewModel
@@ -186,9 +187,12 @@ fun ServerEditScreen(
     viewModel: ServerEditViewModel,
     onSaved: (Long) -> Unit,
     onBack: () -> Unit,
+    /** Opens the key manager when the user has no key to pick yet. */
+    onManageKeys: () -> Unit = {},
 ) {
     val form by viewModel.form.collectAsState()
     val saved by viewModel.saved.collectAsState()
+    val keys by viewModel.keys.collectAsState()
 
     androidx.compose.runtime.LaunchedEffect(saved) {
         saved?.let(onSaved)
@@ -258,15 +262,57 @@ fun ServerEditScreen(
                     isError = form.userError,
                 )
             }
-            OutlinedTextField(
-                value = form.password,
-                onValueChange = { v -> viewModel.update { it.copy(password = v) } },
-                label = { Text(stringResource(R.string.server_password_keep)) },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            // Choosing between a password and a key is the difference between a
+            // server form that works and one that silently cannot log in to half the
+            // hosts an operator owns.
+            Text(
+                text = stringResource(R.string.server_auth_method),
+                style = MaterialTheme.typography.labelLarge,
             )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val passwordTab = form.authType == ServerEntity.AUTH_PASSWORD
+                androidx.compose.material3.FilterChip(
+                    selected = passwordTab,
+                    onClick = {
+                        viewModel.update {
+                            it.copy(authType = ServerEntity.AUTH_PASSWORD, privateKeyId = null)
+                        }
+                    },
+                    label = { Text(stringResource(R.string.server_auth_password)) },
+                )
+                androidx.compose.material3.FilterChip(
+                    selected = !passwordTab,
+                    onClick = {
+                        viewModel.update { it.copy(authType = ServerEntity.AUTH_PRIVATE_KEY) }
+                    },
+                    label = { Text(stringResource(R.string.server_auth_key)) },
+                )
+            }
+
+            if (form.authType == ServerEntity.AUTH_PRIVATE_KEY) {
+                KeyPickerRow(
+                    keys = keys,
+                    selectedId = form.privateKeyId,
+                    onSelect = { key ->
+                        viewModel.update { it.copy(privateKeyId = key.id) }
+                    },
+                )
+                if (keys.isEmpty()) {
+                    androidx.compose.material3.TextButton(
+                        onClick = onManageKeys,
+                    ) { Text(stringResource(R.string.key_add_new)) }
+                }
+            } else {
+                OutlinedTextField(
+                    value = form.password,
+                    onValueChange = { v -> viewModel.update { it.copy(password = v) } },
+                    label = { Text(stringResource(R.string.server_password_keep)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                )
+            }
             OutlinedTextField(
                 value = form.keepaliveSeconds,
                 onValueChange = { v ->

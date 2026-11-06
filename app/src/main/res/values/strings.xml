@@ -191,4 +191,33 @@
     <string name="ai_setup_note">Key được mã hoá bằng Android Keystore và không bao giờ rời khỏi thiết bị.</string>
     <string name="ai_setup_needed">Chưa cấu hình trợ lý AI</string>
     <string name="ai_setup_hint">Nhập địa chỉ API, tên model và key để bắt đầu.</string>    <string name="terminal_scrolled_back">Đang xem lịch sử · %1$d dòng</string>
-</resources>
+    <!-- SSH keys -->
+    <string name="key_title">Khóa SSH</string>
+    <string name="key_count">%1$d khóa</string>
+    <string name="key_import">Nhập khóa</string>
+    <string name="key_empty">Chưa có khóa nào</string>
+    <string name="key_empty_hint">Dán khóa riêng để đăng nhập không cần mật khẩu.</string>
+    <string name="key_paste">Dán khóa riêng (PEM hoặc OpenSSH)</string>
+    <string name="key_passphrase">Cụm mật khẩu (nếu có)</string>
+    <string name="key_save">Lưu khóa</string>
+    <string name="key_locked">có mật khẩu</string>
+    <string name="key_used_by">%1$d máy chủ dùng</string>
+    <string name="key_delete_title">Xóa khóa %1$s?</string>
+    <string name="key_delete_body">Không thể hoàn tác. Khóa đang được máy chủ dùng sẽ không xóa được.</string>
+    <string name="key_none_yet">Chưa có khóa. Nhập khóa trước rồi chọn ở đây.</string>
+    <string name="key_pick">Khóa riêng</string>
+    <string name="key_add_new">Nhập khóa mới</string>
+    <string name="server_auth_method">Cách đăng nhập</string>
+    <string name="server_auth_password">Mật khẩu</string>
+    <string name="server_auth_key">Khóa riêng</string>    <!-- Settings -->
+    <string name="settings_language">Ngôn ngữ</string>
+    <string name="settings_language_restart">Đổi ngôn ngữ cần mở lại app.</string>
+    <string name="settings_terminal">Terminal</string>
+    <string name="settings_font_size">Cỡ chữ</string>
+    <string name="settings_cursor_blink">Con trỏ nhấp nháy</string>
+    <string name="settings_keep_awake">Giữ màn hình sáng</string>
+    <string name="settings_reset_look">Đặt lại giao diện terminal</string>
+    <string name="settings_security">Bảo mật</string>
+    <string name="settings_keys_subtitle">Quản lý khóa dùng để đăng nhập</string>
+    <string name="settings_about">Thông tin</string>
+    <string name="settings_version">Phiên bản</string></resources>

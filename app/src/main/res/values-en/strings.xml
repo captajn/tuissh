@@ -190,4 +190,33 @@
     <string name="ai_setup_note">The key is encrypted with the Android Keystore and never leaves the device.</string>
     <string name="ai_setup_needed">The assistant is not configured</string>
     <string name="ai_setup_hint">Enter the API base URL, model name and key to start.</string>    <string name="terminal_scrolled_back">Viewing history · %1$d lines</string>
-</resources>
+    <!-- SSH keys -->
+    <string name="key_title">SSH keys</string>
+    <string name="key_count">%1$d keys</string>
+    <string name="key_import">Import key</string>
+    <string name="key_empty">No keys yet</string>
+    <string name="key_empty_hint">Paste a private key to log in without a password.</string>
+    <string name="key_paste">Paste a private key (PEM or OpenSSH)</string>
+    <string name="key_passphrase">Passphrase (if any)</string>
+    <string name="key_save">Save key</string>
+    <string name="key_locked">passphrase</string>
+    <string name="key_used_by">used by %1$d servers</string>
+    <string name="key_delete_title">Delete key %1$s?</string>
+    <string name="key_delete_body">This cannot be undone. A key still used by a server cannot be deleted.</string>
+    <string name="key_none_yet">No keys yet. Import one first, then pick it here.</string>
+    <string name="key_pick">Private key</string>
+    <string name="key_add_new">Import a new key</string>
+    <string name="server_auth_method">Sign in with</string>
+    <string name="server_auth_password">Password</string>
+    <string name="server_auth_key">Private key</string>    <!-- Settings -->
+    <string name="settings_language">Language</string>
+    <string name="settings_language_restart">Changing the language needs an app restart.</string>
+    <string name="settings_terminal">Terminal</string>
+    <string name="settings_font_size">Font size</string>
+    <string name="settings_cursor_blink">Blinking cursor</string>
+    <string name="settings_keep_awake">Keep the screen on</string>
+    <string name="settings_reset_look">Reset terminal appearance</string>
+    <string name="settings_security">Security</string>
+    <string name="settings_keys_subtitle">Manage the keys used to sign in</string>
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version</string></resources>

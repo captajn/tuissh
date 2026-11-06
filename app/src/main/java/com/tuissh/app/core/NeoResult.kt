@@ -107,6 +107,10 @@ sealed class NeoError(message: String) : Exception(message) {
 
     data class BastionNotFound(val name: String) : NeoError("Bastion server not found: $name")
 
+    /** A hop in the jump chain refused or could not be reached. */
+    data class BastionUnreachable(val host: String, val detail: String) :
+        NeoError("Could not connect through $host: $detail")
+
     data class CyclicBastion(val chain: String) : NeoError("Cyclic bastion configuration: $chain")
 
     data class InvalidProxy(val detail: String) : NeoError("Invalid SOCKS5 proxy: $detail")

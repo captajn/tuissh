@@ -319,6 +319,17 @@ private fun TerminalDestination(
             hostKeyVerifier = services.hostKeyVerifier,
             prompts = prompts,
         )
+        // Connect before forwarding. A rule needs a live transport: asking for one
+        // before the session is up returns NotConnected, so every auto-start rule
+        // would silently do nothing.
+        when (val connected = ssh.connect()) {
+            is NeoResult.Err -> {
+                problem = connected.error.message
+                return@LaunchedEffect
+            }
+            is NeoResult.Ok -> Unit
+        }
+
         // Open the auto-start forwards before the shell, so a rule that fails is
         // reported while the user is still on the connecting screen rather than
         // silently not existing once they are inside the terminal.

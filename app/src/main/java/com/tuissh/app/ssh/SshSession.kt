@@ -536,6 +536,35 @@ class SshSession(
      * host wrong after it normalises a bind address, which leaves the listener open. A
      * live test caught exactly that — the port kept answering after this was called.
      */
+    /**
+     * Open a local port that forwards to [host]:[port] through this session.
+     *
+     * Used to chain a ProxyJump: each hop exposes the next machine on a loopback port
+     * here, so the following hop connects to that port instead of needing a route.
+     * Port 0 asks the OS for a free port, which avoids colliding with whatever else this
+     * device is already listening on.
+     *
+     * @return the port that was bound
+     */
+    suspend fun openTunnelTo(host: String, port: Int): NeoResult<Int> =
+        withContext(Dispatchers.IO) {
+            val s = session ?: return@withContext NeoResult.Err(NeoError.NotConnected)
+            try {
+                val bound = s.setPortForwardingL("127.0.0.1", 0, host, port)
+                if (bound <= 0) {
+                    return@withContext NeoResult.Err(
+                        NeoError.BastionUnreachable(host, "the forward did not bind"),
+                    )
+                }
+                // Tracked so stopForwards() closes it too.
+                openedForwardsL.add("127.0.0.1" to bound)
+                NeoLog.i(LogTag.SSH, "tunnel 127.0.0.1:$bound -> $host:$port")
+                NeoResult.Ok(bound)
+            } catch (e: JSchException) {
+                NeoResult.Err(NeoError.BastionUnreachable(host, e.message ?: "forward failed"))
+            }
+        }
+
     suspend fun stopForwards() = withContext(Dispatchers.IO) {
         val s = session ?: return@withContext
         for ((host, port) in openedForwardsL) {

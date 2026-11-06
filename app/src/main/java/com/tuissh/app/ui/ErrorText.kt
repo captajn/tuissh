@@ -33,6 +33,8 @@ fun NeoError.localized(): String = when (this) {
     is NeoError.PathNotFound -> message.orEmpty()
     is NeoError.IsDirectory -> message.orEmpty()
     is NeoError.BastionNotFound -> stringResource(R.string.err_bastion_not_found)
+    is NeoError.BastionUnreachable ->
+        stringResource(R.string.err_bastion_unreachable, host, detail)
     is NeoError.CyclicBastion -> stringResource(R.string.err_cyclic_bastion)
     is NeoError.InvalidProxy -> stringResource(R.string.err_connection_refused)
     is NeoError.PortBindFailed -> stringResource(R.string.err_connection_refused)

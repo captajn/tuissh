@@ -236,4 +236,5 @@
     <string name="forward_delete_title">Delete this rule?</string>    <string name="server_bastion">Jump host (ProxyJump)</string>
     <string name="server_bastion_none">No other server is available as a jump host.</string>
     <string name="server_bastion_direct">Connect directly</string>    <string name="forward_failed">Could not open: %1$s</string>
+    <string name="err_bastion_unreachable">Could not connect through %1$s: %2$s</string>
 </resources>
